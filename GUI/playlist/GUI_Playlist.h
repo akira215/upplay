@@ -31,7 +31,7 @@
 #include "GUI_Playlist.h"
 #include "ui_GUI_Playlist.h"
 #include "GUI/playlist/delegate/PlaylistItemDelegate.h"
-#include "playlist/Playlist.h"
+#include "playlist/playlist.h"
 #include "HelperStructs/MetaData.h"
 #include "HelperStructs/PlaylistMode.h"
 
@@ -51,7 +51,7 @@ public:
     void dragMoveEvent(QDragMoveEvent* event);
 
 signals:
-    // Bad name, emitted on dbl-click, should be row_activated()
+    // Emitted on dbl-click
     void row_activated(int);
 
     // Inform about first row in selection (might want to start there
@@ -74,6 +74,7 @@ public slots:
     void setMode(Playlist_Mode mode);
     void setPlayerMode(Playlist_Mode mode);
     void psl_show_small_playlist_items(bool small_items);
+    void psl_next_group_html(QString html);
 
 private slots:
     void selection_changed(MetaDataList&);

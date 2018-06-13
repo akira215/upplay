@@ -1,5 +1,3 @@
-/* PlaylistItemDelegateInterface.cpp */
-
 /* Copyright (C) 2012  Lucio Carreras
  *
  * This file is part of sayonara player
@@ -17,11 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
 #ifndef PLAYLISTITEMDELEGATEINTERFACE_H_
 #define PLAYLISTITEMDELEGATEINTERFACE_H_
-
 
 #include <QObject>
 #include <QLabel>
@@ -34,31 +29,22 @@ class PlaylistItemDelegate : public QItemDelegate {
 
 public:
     PlaylistItemDelegate(QListView *parent, bool compact);
-	virtual ~PlaylistItemDelegate();
+    virtual ~PlaylistItemDelegate();
 
-    virtual void paint( QPainter *painter, const QStyleOptionViewItem &option,
-                         const QModelIndex &index) const;
+    virtual void paint(QPainter *painter, const QStyleOptionViewItem& option,
+                       const QModelIndex& index) const;
 
-
-    QSize sizeHint(const QStyleOptionViewItem &option,
-                         const QModelIndex &index) const;
+    QSize sizeHint(const QStyleOptionViewItem& option,
+                   const QModelIndex& index) const;
 
     void setMaxWidth(int w);
-    int rowHeight();
-
-    virtual void setEditorData(QWidget *editor, const QModelIndex &index) const;
-    virtual void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
-    virtual QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+    int rowHeight() const;
 
 private:
-    int		_rendered_items;
-    int		_row_height;
-    int		_max_width;
-    QListView*	_parent;
+    int     _max_width;
+    bool    _compact;
+    QListView*  _parent;
     GUI_PlaylistEntry* _pl_entry;
-
-
 };
-
 
 #endif /* PLAYLISTITEMDELEGATEINTERFACE_H_ */

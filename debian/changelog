@@ -1,3 +1,87 @@
+upplay (1.2.8-1) unstable; urgency=low
+
+  * 
+
+ -- Jean-Francois Dockes <jf@dockes.org>  Thu, 03 Jan 2017 09:48:00 +0100
+
+upplay (1.2.7-1) unstable; urgency=low
+
+  * Turn off CDS update id monitoring by default
+
+ -- Jean-Francois Dockes <jf@dockes.org>  Thu, 29 Sep 2016 15:51:00 +0100
+
+upplay (1.2.6-1) unstable; urgency=low
+
+  * Fix bug in renderer selection when filtering non-openhome renderers.
+
+ -- Jean-Francois Dockes <jf@dockes.org>  Mon, 12 Sep 2016 14:39:00 +0100
+
+upplay (1.2.5-1) unstable; urgency=low
+
+  * Add scrolling to the songcast connections dialog. 
+  * Option to only show OpenHome renderers in the Renderer choice dialog
+    (avoids bubble upnp servers doublons).
+  * Fix drag&drop being wrongly initiated in some cases.
+  * Last.FM scrobbler.
+  * Font size improvements.
+  * Changed libupnpp dependancy to libupnpp3. Upplay would work fine with
+    libupnpp2, done to keep in sync with upmpdcli and avoids needing both
+    libs.   
+
+ -- Jean-Francois Dockes <jf@dockes.org>  Sun, 11 Sep 2016 09:50:00 +0100
+
+upplay (1.2.4-1) unstable; urgency=low
+
+  * Some fixes to the AVTransport interface
+
+ -- Jean-Francois Dockes <jf@dockes.org>  Fri, 26 Feb 2016 14:36:00 +0100
+
+upplay (1.2.3-1) unstable; urgency=low
+
+  * Changed Songcast connection tool to match changes in upmpdcli et al
+  * Deactivate send to playlist from dir browser when Radio is active
+  * Network interface selection
+  * Other Small fixes (tab close buttons, issues in radio interface)
+  
+ -- Jean-Francois Dockes <jf@dockes.org>  Thu, 04 Feb 2016 18:52:00 +0100
+
+upplay (1.2.2-1) unstable; urgency=low
+
+  * Improve updates of playlist and cover image when the renderer source
+    changes 
+
+ -- Jean-Francois Dockes <jf@dockes.org>  Wed, 23 Dec 2015 17:41:00 +0100
+
+upplay (1.2.1-1) unstable; urgency=low
+
+  * Fixed Songcast tool issue (checked state of buttons not reset)
+
+ -- Jean-Francois Dockes <jf@dockes.org>  Sun, 18 Dec 2015 16:13:00 +0100
+
+upplay (1.2.0-1) unstable; urgency=low
+
+  * OpenHome renderer Source selection
+  * OpenHome Radio support
+  * Songcast Sender/Receiver connection management tool
+  * (Internal) code cleanup.
+
+ -- Jean-Francois Dockes <jf@dockes.org>  Sun, 13 Dec 2015 19:01:00 +0100
+
+upplay (1.1.0-1) unstable; urgency=low
+
+  * More preferences (directory: display artists with albums lists,
+     truncate artists in track lists)
+  * Random tracks and albums play
+  * Improve Back action availability
+
+ -- Jean-Francois Dockes <jf@dockes.org>  Wed, 13 Nov 2015 22:20:00 +0100
+
+upplay (1.0.0-1) unstable; urgency=low
+
+  * New logo, sort options, smoother volume control, renderer reconnections.
+
+ -- Jean-Francois Dockes <jf@dockes.org>  Sun, 16 Aug 2015 10:25:00 +0100
+
 upplay (0.10.0-1) unstable; urgency=low
 
   * Support pure OpenHome renderers like BubbleUPnP Server.

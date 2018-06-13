@@ -32,18 +32,20 @@ using namespace std;
 
 using namespace UPnPP;
 
+// Note: can't call this OHPlaylist because UPnPClient has it too (and we
+// sometimes use the unqualified name)
 class OHPlayer : public OHPlaylistQO {
 Q_OBJECT
 
 public:
     OHPlayer(UPnPClient::OHPLH ohpl, QObject *parent = 0)
-        : OHPlaylistQO(ohpl, parent), m_id(-1), m_songsecs(-1),
+        : OHPlaylistQO(ohpl, parent), m_songsecs(-1),
           m_ininsert(false) {
         connect(this, SIGNAL(trackArrayChanged()),
                 this, SLOT(translateMetaData()));
         connect(this, SIGNAL(tpStateChanged(int)), 
                 this, SLOT(playerState(int)));
-        connect(this, SIGNAL(trackIdChanged(int)),
+        connect(this, SIGNAL(currentTrackId(int)),
                 this, SLOT(onTrackIdChanged(int)));
         connect(this, SIGNAL(shuffleChanged(bool)), 
                 this, SLOT(onShuffleState(bool)));
@@ -53,11 +55,11 @@ public:
 
 public slots:
 
-    // Seek to time in percent
-    void seekPC(int pc) {
+    // Seek to time in seconds
+    void seek(int secs) {
         if (m_songsecs == -1) {
-            STD_UNORDERED_MAP<int, UPnPClient::UPnPDirObject>::iterator
-                poolit = m_metapool.find(m_id);
+            std::unordered_map<int, UPnPClient::UPnPDirObject>::iterator
+                poolit = m_metapool.find(m_curid);
             if (poolit != m_metapool.end()) {
                 UPnPClient::UPnPDirObject& ude = poolit->second;
                 std::string sval;
@@ -70,10 +72,16 @@ public slots:
         if (m_songsecs == -1) {
             return;
         }
-        int seeksecs = (m_songsecs * pc) / 100;
-        seekSecondAbsolute(seeksecs);
+        seekSecondAbsolute(secs);
     }
 
+    // The duration is sometimes not set in the didl metadata and the
+    // playlist app object may be able to retrieve it from ohtime. We
+    // then get the info through this method.
+    void setSongSecs(int secs) {
+        m_songsecs = secs;
+    }
+    
     // Insert after idx
     void insertTracks(const MetaDataList& meta, int idx) {
         while (m_ininsert) {
@@ -111,6 +119,8 @@ public slots:
             }
         }
         qDebug() << "OHPlayer::insertTracks: sync at end";
+        // Get rid of, e.g. queued "queue empty" events
+        qApp->processEvents();
         sync();
         asyncArrayUpdates(true);
         m_ininsert = false;
@@ -186,8 +196,7 @@ private slots:
         m_mode.repAll = st;
         emit playlistModeChanged(m_mode);
     }
-    void onTrackIdChanged(int id) {
-        m_id = id;
+    void onTrackIdChanged(int) {
         m_songsecs = -1;
     }
 
@@ -196,7 +205,7 @@ private slots:
         MetaDataList mdv;
         for (std::vector<int>::iterator idit = m_idsv.begin(); 
              idit != m_idsv.end(); idit++) {
-            STD_UNORDERED_MAP<int, UPnPClient::UPnPDirObject>::iterator poolit 
+            std::unordered_map<int, UPnPClient::UPnPDirObject>::iterator poolit 
                 = m_metapool.find(*idit);
             if (poolit == m_metapool.end()) {
                 qDebug() << "OHPlayer::translateMetaData: "
@@ -221,14 +230,12 @@ private slots:
         emit metadataArrayChanged(mdv);
     }
 
-
 signals:
     void audioStateChanged(int as, const char *);
     void metadataArrayChanged(const MetaDataList& mdv);
     void playlistModeChanged(Playlist_Mode);
 
 private:
-    int m_id; // Current playing track
     int m_songsecs;
     Playlist_Mode m_mode;
     bool m_ininsert;

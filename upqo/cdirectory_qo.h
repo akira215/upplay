@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 J.F.Dockes 
+/* Copyright (C) 2014 J.F.Dockes
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation; either version 2 of the License, or
@@ -24,36 +24,39 @@
 
 #include <QThread>
 #include <QDebug>
+#include <QString>
 
 #include <upnp/upnp.h>
 
 #include "libupnpp/control/cdirectory.hxx"
 
-class ContentDirectoryQO : public QThread {
+// A thread object to run a single directory read operation
+class CDBrowseQO : public QThread {
     Q_OBJECT;
 
- public: 
-    ContentDirectoryQO(UPnPClient::CDSH server, std::string objid, 
-                       std::string ss = std::string(), QObject *parent = 0)
+public:
+    CDBrowseQO(UPnPClient::CDSH server, std::string objid,
+               std::string ss = std::string(), QObject *parent = 0)
         : QThread(parent), m_serv(server), m_objid(objid), m_searchstr(ss),
           m_cancel(false) {
     }
 
-    ~ContentDirectoryQO() {
+    ~CDBrowseQO() {
     }
 
     virtual void run() {
-        qDebug() << "ContentDirectoryQO::run. Search string: " << 
-            m_searchstr.c_str();
-	int offset = 0;
+        qDebug() << "CDBrowseQO::run. Search string: " <<
+                 m_searchstr.c_str();
+        int offset = 0;
         int toread = 20; // read small count the first time
-	int total = 1000;// Updated on first read.
+        int total = 1000;// Updated on first read.
         int count;
 
-	while (offset < total) {
-            if (m_cancel)
+        while (offset < total) {
+            if (m_cancel) {
                 break;
-            UPnPClient::UPnPDirContent *slice = 
+            }
+            UPnPClient::UPnPDirContent *slice =
                 new UPnPClient::UPnPDirContent();
             if (slice == 0) {
                 m_status = UPNP_E_OUTOF_MEMORY;
@@ -77,13 +80,17 @@ class ContentDirectoryQO : public QThread {
             emit sliceAvailable(slice);
 
             toread = m_serv->goodSliceSize();
-	}
+        }
         emit done(m_status);
-	m_status = UPNP_E_SUCCESS;
+        m_status = UPNP_E_SUCCESS;
     }
-    void setCancel() {m_cancel = true;}
+    void setCancel() {
+        m_cancel = true;
+    }
 
-    const std::string& getObjid() {return m_objid;}
+    const std::string& getObjid() {
+        return m_objid;
+    }
     UPnPClient::ContentDirectory::ServiceKind getKind() {
         return m_serv->getKind();
     }
@@ -100,6 +107,45 @@ private:
     // are unchanged when we append
     int m_status;
     bool m_cancel;
+};
+
+
+// The content directory object is used to generate SystemUpdateId and
+// ContainerUpdateIDs events in case we might care
+class ContentDirectoryQO : public QObject, public UPnPClient::VarEventReporter {
+    Q_OBJECT;
+
+public:
+    ContentDirectoryQO(UPnPClient::CDSH service, QObject *parent = 0)
+        : QObject(parent), m_srv(service) {
+        m_srv->installReporter(this);
+    }
+    virtual ~ContentDirectoryQO() {
+        m_srv->installReporter(0);
+    }
+
+    // SystemUpdateId
+    virtual void changed(const char *nm, int value) {
+        //qDebug() << "CDQO: Changed: " << nm << " (int): " << value;
+        if (!strcmp(nm, "SystemUpdateID")) {
+            emit systemUpdateIDChanged(value);
+        }
+    }
+    virtual void changed(const char *nm, const char *value) {
+        //qDebug() << "CDQO: Changed: " << n << " (char*): " << v;
+        if (!strcmp(nm, "ContainerUpdateIDs")) {
+            emit containerUpdateIDsChanged(QString::fromUtf8(value));
+        }
+    }
+
+    UPnPClient::CDSH srv() {return m_srv;}
+    
+signals:
+    void systemUpdateIDChanged(int);
+    void containerUpdateIDsChanged(QString);
+
+private:
+    UPnPClient::CDSH m_srv;
 };
 
 #endif /* _DIRREADER_H_INCLUDED_ */

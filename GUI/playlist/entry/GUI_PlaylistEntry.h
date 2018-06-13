@@ -7,15 +7,15 @@
 #include "HelperStructs/MetaData.h"
 
 class GUI_PlaylistEntry : public QFrame {
-
     Q_OBJECT
 
 public:
-    GUI_PlaylistEntry(QWidget*){}
-    virtual ~GUI_PlaylistEntry(){}
+    GUI_PlaylistEntry(QWidget*) {}
+    virtual ~GUI_PlaylistEntry() {}
 
-    virtual  void setContent(const MetaData& md, int idx)=0;
-    void setWidth(int w){
+    virtual int fontheight() = 0;
+    virtual  void setContent(const MetaData& md, int idx) = 0;
+    void setWidth(int w) {
         this->resize(w, this->height());
     }
 };

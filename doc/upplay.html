@@ -3,8 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.6.7" />
-<title>The Upplay Qt-X11-Unix UPnP audio control point</title>
+<meta name="generator" content="AsciiDoc 8.6.9" />
+<title>Upplay manual</title>
 <style type="text/css">
 /* Shared CSS for AsciiDoc xhtml11 and html5 backends */
 
@@ -87,9 +87,15 @@ ul, ol, li > p {
 ul > li     { color: #aaa; }
 ul > li > * { color: black; }
 
-pre {
+.monospaced, code, pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
   padding: 0;
   margin: 0;
+}
+pre {
+  white-space: pre-wrap;
 }
 
 #author {
@@ -219,7 +225,7 @@ div.exampleblock > div.content {
 }
 
 div.imageblock div.content { padding-left: 0; }
-span.image img { border-style: none; }
+span.image img { border-style: none; vertical-align: text-bottom; }
 a.image:visited { color: white; }
 
 dl {
@@ -415,12 +421,6 @@ div.unbreakable { page-break-inside: avoid; }
  *
  * */
 
-tt {
-  font-family: "Courier New", Courier, monospace;
-  font-size: inherit;
-  color: navy;
-}
-
 div.tableblock {
   margin-top: 1.0em;
   margin-bottom: 1.5em;
@@ -453,12 +453,6 @@ div.tableblock > table[frame="vsides"] {
  * html5 specific
  *
  * */
-
-.monospaced {
-  font-family: "Courier New", Courier, monospace;
-  font-size: inherit;
-  color: navy;
-}
 
 table.tableblock {
   margin-top: 1.0em;
@@ -539,6 +533,8 @@ body.manpage div.sectionbody {
 @media print {
   body.manpage div#toc { display: none; }
 }
+
+
 </style>
 <script type="text/javascript">
 /*<![CDATA[*/
@@ -731,16 +727,21 @@ install: function(toclevels) {
 }
 
 }
-asciidoc.install();
+asciidoc.install(2);
 /*]]>*/
 </script>
 </head>
 <body class="article">
 <div id="header">
-<h1>The Upplay Qt-X11-Unix UPnP audio control point</h1>
+<h1>Upplay manual</h1>
+<div id="toc">
+  <div id="toctitle">Table of Contents</div>
+  <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
+</div>
 </div>
 <div id="content">
-<div id="preamble">
+<div class="sect1">
+<h2 id="_overview">Overview</h2>
 <div class="sectionbody">
 <div class="imageblock">
 <div class="content">
@@ -754,6 +755,8 @@ asciidoc.install();
 <div class="sectionbody">
 <div class="paragraph"><p>Play, Pause, Stop, Next, Previous, Seek, and Adjust volume. I would guess that
 these don&#8217;t need explanations.</p></div>
+<div class="paragraph"><p>Most elements displaying information about the current track have tooltips
+which can display a bigger and more readable version.</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -781,6 +784,13 @@ Select and drag-drop to reorder
 Right click and select <em>Remove</em> to delete current selection
 </p>
 </li>
+<li>
+<p>
+Right click and select <em>Sort by track number</em> to reorder tracks (useful
+  when tracks from an album directory were sent in wrong order by the Media
+  Server).
+</p>
+</li>
 </ul></div>
 <div class="paragraph"><p>Playlist buttons:</p></div>
 <div class="ulist"><ul>
@@ -806,7 +816,7 @@ The sequential number toggle will show numbers in front of the
 </li>
 </ul></div>
 <div class="paragraph"><p>You can clear the current playlist by clicking the broom icon above it on
-the left.</p></div>
+the right.</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -833,48 +843,155 @@ If you perform searches, your search history will be stacked at the end
 <div class="paragraph"><p>Left-Clicking a track title will send it to the playlist, according to the
 current playlist add mode.</p></div>
 <div class="paragraph"><p>Left-Clicking a directory title will get you there.</p></div>
-<div class="paragraph"><p>Right-clicking a track title will propose three actions:</p></div>
+<div class="paragraph"><p>Right-clicking a track title will propose the following actions:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-Send to playlist: same as left-clicking.
+<code>Back</code>
 </p>
 </li>
 <li>
 <p>
-Send all to playlist: send all tracks from this directory.
+<code>Send to playlist</code>: same as left-clicking.
 </p>
 </li>
 <li>
 <p>
-Send all from here to playlist: this track and the following ones go to
+<code>Send all to playlist</code>: send all tracks from this directory.
+</p>
+</li>
+<li>
+<p>
+<code>Send all from here to playlist</code>: this track and the following ones go to
    the playlist.
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>Right-clicking a directory (in the list or in the path) will propose two
-actions:</p></div>
+<div class="paragraph"><p>Right-clicking a directory (in the list or in the path) will propose the
+following actions:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-Send to playlist: this is a recursive walk, it will send all tracks from
+<code>Back</code>
+</p>
+</li>
+<li>
+<p>
+<code>Send to playlist</code>: this is a recursive walk, it will send all tracks from
   the subtree to the playlist. Don&#8217;t do this at the root of a big tree&#8230;
 </p>
 </li>
 <li>
 <p>
-Open in new tab.
+<code>Open in new tab</code>.
+</p>
+</li>
+<li>
+<p>
+<code>Random play by tracks</code>: this is analogous to <code>Send to playlist</code>, but the
+   list is shuffled, then sent to the Renderer by slices (of 30 tracks). The
+   slicing is so that so you can use a very big list without swamping the
+   renderer.
+</p>
+</li>
+<li>
+<p>
+<code>Random play by groups</code>: this will play groups of tracks, corresponding to
+  the lowest level of directories in the subtree, typically albums, but
+  these may also be MinimServer Groups for example.
+</p>
+</li>
+<li>
+<p>
+<code>Stop random play</code>: if currently playing.
 </p>
 </li>
 </ul></div>
+<div class="paragraph"><p>While in "Random play by group" mode, the playlist broom tooltip displays
+the next group. Clicking the button will skip to it.</p></div>
 <div class="paragraph"><p>Right-clicking empty space will propose to go back (or up).</p></div>
 <div class="paragraph"><p>Mid-Clicking a directory from the entries list, or a search or directory in
 the path at the top will open the element in a new tab. This can be
 particularly useful if you want to go back to a previous search without
 losing the current display.</p></div>
-<div class="paragraph"><p><tt>^f</tt> or <tt>/</tt> will open the search panel, <tt>Esc</tt> will close it (or the x-cross
+<div class="paragraph"><p><code>^f</code> or <code>/</code> will open the search panel, <code>Esc</code> will close it (or the x-cross
 button at the right).</p></div>
-<div class="paragraph"><p><a href="searching.html">more detail on search</a>.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_searching">Searching</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Upplay supports two search modes:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Inside the current directory page: this is handy to quickly skip inside
+  a long list.
+</p>
+</li>
+<li>
+<p>
+Server search.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>The search panel is located at the bottom of the library window (the one on
+the right), and normally hidden. You can open it by the following actions:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Typing <code>/</code> inside the library window.
+</p>
+</li>
+<li>
+<p>
+Typing <code>Ctrl+f</code> inside the library window.
+</p>
+</li>
+<li>
+<p>
+Using the View menu
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Not all servers support search (e.g, MediaTomb does not, Minidlna does,
+etc.).</p></div>
+<div class="paragraph"><p>You can close the panel by the following actions:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Typing <code>Esc</code> (the Escape key).
+</p>
+</li>
+<li>
+<p>
+Clicking the x-cross icon on the right of the panel
+</p>
+</li>
+<li>
+<p>
+Using the <code>View</code> menu.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>When the search panel opens for the first time, the panel is in local
+search mode. Typing inside the search entry area will try to find matches
+in the page. You can use the two arrow buttons or type <code>F3</code> or <code>Shift+F3</code>
+to find the next or previous match.</p></div>
+<div class="paragraph"><p>In server mode, the search panel will let you enter a search string and the
+kind of field inside which you want to search (the combobox on the right,
+Artist/Album/Title). Type <code>Enter</code> or click the search button to start the
+search.</p></div>
+<div class="paragraph"><p>The results are displayed just like a directory listing and can be
+used in the same way (including opening tabs for directory listings, etc.).</p></div>
+<div class="paragraph"><p>Server searches are always relative to the first directory earlier in the
+path, never to another search.
+If your search yields nothing, one of the things to check is that you are
+high enough in the tree (not searching a single directory).</p></div>
+<div class="paragraph"><p>Also <strong><em>space characters are significant in the search entry</em></strong>. This has a
+capacity for trouble but it can also be a great help when trying to match
+words (there are no standard UPnP ways to specify word matches, or anchor a
+search at the beginning or end of a field).</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -885,13 +1002,13 @@ sign will close it&#8230;</p></div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_menus">Menus</h2>
+<h2 id="menus">Menus</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>File:</p></div>
 <div class="ulist"><ul>
 <li>
 <p>
-Change Media Renderer will let you do just this. You will see a dialog
+<code>Change Media Renderer</code> will let you do just this. You will see a dialog
   with the list of renderers currently seen on the network. After choosing
   one, you may decide that the current <strong>upplay</strong> playlist will replace the
   one or the new renderer, or be appended to it by checking the appropriate
@@ -900,22 +1017,130 @@ Change Media Renderer will let you do just this. You will see a dialog
 </li>
 <li>
 <p>
-Save / Load playlist will let you save the current playlist to a local
+<code>Select Source</code> is only activated if the current Renderer supports
+  OpenHome, and will let you select the Source among the available ones
+  (<code>Playlist</code>, <code>Radio</code> etc.).
+</p>
+</li>
+<li>
+<p>
+<code>Save / Load playlist</code> will let you save the current playlist to a local
   file, or load one which you previously saved.
 </p>
 </li>
+<li>
+<p>
+<code>Open Songcast Tool</code> will open a dialog for managing the connections
+  between Linn Songcast Senders or Receivers. <a href="songcast.html">more
+  details here</a>.
+</p>
+</li>
+<li>
+<p>
+<code>View</code>  lets you elect to hide the right panel (directory listing), change
+   the color scheme for a dark one and other interesting experiences. Also
+   a number of Preferences can be adjusted from the appropriately named
+   submenu.
+</p>
+</li>
 </ul></div>
-<div class="paragraph"><p>View:  you can elect to hide the right panel (directory listing), change
-the color scheme for a dark one and other interesting experiences.</p></div>
-<div class="paragraph"><p>Preferences should be reasonably self-explaining.</p></div>
-<div class="paragraph"><p>And help, there is no help&#8230;</p></div>
+<div class="paragraph"><p>And <code>Help</code>, there is no help&#8230;</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="keyboard">Keyboard shortcuts</h2>
+<div class="sectionbody">
+<div class="ulist"><ul>
+<li>
+<p>
+Space/MediaTogglePlayPause/MediaPlay/MediaPause : toggle play/pause.
+</p>
+</li>
+<li>
+<p>
+Ctl+Right / MediaNext : next track.
+</p>
+</li>
+<li>
+<p>
+Ctl+Left / MediaPrevious : previous track.
+</p>
+</li>
+<li>
+<p>
+Ctl+Space : stop.
+</p>
+</li>
+<li>
+<p>
+Ctl+Up / Plus : volume increase.
+</p>
+</li>
+<li>
+<p>
+Ctl+Down/ Minus : volume decrease.
+</p>
+</li>
+<li>
+<p>
+Right : seek forward a few secs.
+</p>
+</li>
+<li>
+<p>
+Left : seek backward a few secs.
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="hiresadjust">Adjusting the font sizes on high resolution displays</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Most people will find that the font sizes (and buttons/icons) are too small
+on high DPI displays.</p></div>
+<div class="paragraph"><p>As of version 1.2.5, the GUI can be partially adjusted by editing two style
+sheet files. To adjust the font sizes:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Edit <code>/usr/share/upplay/cdbrowser/cdbrowser.css</code>, and uncomment the
+  "font-size" directive at the top. Adjust the size to taste, meaning that
+  the line should look like the following (with your preferred value in
+  place of 30):
+</p>
+<div class="literalblock">
+<div class="content">
+<pre><code>font-size: 30pt;</code></pre>
+</div></div>
+</li>
+<li>
+<p>
+Edit <code>/usr/share/upplay/common.css</code> and adjust the 6 font-size
+  directives. An adequate approach will usually be to multiply the sizes by
+  some constant factor (e.g.: 2 &#8230;).
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>On Windows, use <em>notepad</em> or an equivalent pure text editor to edit the
+files, which are located in the <em>share</em> and <em>share\cdbrowser</em>
+subdirectories of the top installation directory (e.g: <em>C:\Program Files
+(x86)\Upplay\</em>). You need to specify "all files" when opening the files,
+because notepad does not list <em>.css</em> files by default (only <em>.txt</em>).</p></div>
+<div class="paragraph"><p>The adjustment is not perfect for now: the player section does not update
+its size, which means that some titles will be truncated (in the top left
+area), and the icon sizes are unchanged. Arbitrary text truncation may
+happen in places. This will hopefully be improved in a future release.</p></div>
+<div class="paragraph"><p>There are other, system-based, approaches described on the following Qt page:
+<a href="http://doc.qt.io/qt-5/highdpi.html">http://doc.qt.io/qt-5/highdpi.html</a></p></div>
 </div>
 </div>
 </div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-11-13 10:36:27 CET
+Last updated
+ 2017-05-08 14:12:03 CEST
 </div>
 </div>
 </body>

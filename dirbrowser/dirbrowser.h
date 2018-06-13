@@ -18,22 +18,28 @@
 #define _DIRBROWSER_H_INCLUDED_
 #include "ui_dirbrowser.h"
 
-#include "playlist/Playlist.h"
+#include <memory>
+
+#include "HelperStructs/MetaData.h"
+#include "playlist/playlist.h"
 #include "cdbrowser.h"
 
 // The DirBrowser object has multiple tabs, each displaying the server
 // list of a directory listing or search result, and a hideable search
 // panel at the bottom
 class DirBrowser : public QWidget {
-    Q_OBJECT
+    Q_OBJECT;
+
 public:
-    DirBrowser(QWidget *parent, Playlist *pl);
+    DirBrowser(QWidget *parent, std::shared_ptr<Playlist> pl);
     bool insertActive();
     CDBrowser *currentBrowser();
     void doSearch(const QString&, bool);
+    bool randPlayActive() {return m_randplayer != 0;}
+    bool have_playlist() {return bool(m_pl);}
 
 public slots:
-    void setPlaylist(Playlist *pl);
+    void setPlaylist(std::shared_ptr<Playlist> pl);
     void setStyleSheet(bool);
     void addTab();
     void closeTab(int);
@@ -57,14 +63,24 @@ public slots:
     void onInsertDone() {m_insertactive = false;}
     void setInsertActive(bool onoff);
     void onBrowseInNewTab(QString UDN, std::vector<CDBrowser::CtPathElt>);
+    void onRandTracksToPlaylist(const MetaDataList& mdl);
+    void onEnterRandPlay(RandPlayer::PlayMode mode, const
+                         std::vector<UPnPClient::UPnPDirObject>&);
+    void onRandStop();
+    void onRandDone();
 
+signals:
+    void sig_next_group_html(QString);
+    void sig_sort_order();
+    
 private:
     void setupTabConnections(int i);
     void setupTabConnections(CDBrowser* w);
 
     Ui::DirBrowser *ui;
-    Playlist *m_pl;
+    std::shared_ptr<Playlist> m_pl;
     bool m_insertactive;
+    RandPlayer *m_randplayer;
 };
 
 

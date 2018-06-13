@@ -22,77 +22,84 @@
 #define APPLICATION_H
 
 #include <string>
+#include <memory>
 
 #include <QObject>
-
 #include <QApplication>
-#include <QStringList>
-#include <QMainWindow>
-#include <QTranslator>
 
-#include "dirbrowser/dirbrowser.h"
-#include "upqo/renderingcontrol_qo.h"
-#include "upqo/ohtime_qo.h"
-#include "upqo/ohvolume_qo.h"
-#include "upadapt/avtadapt.h"
-#include "upadapt/ohpladapt.h"
+#include "libupnpp/control/mediarenderer.hxx"
+#include "upqo/ohproduct_qo.h"
 
-#include "GUI/player/GUI_Player.h"
-#include "GUI/playlist/GUI_Playlist.h"
-#include "playlist/Playlist.h"
-
-#include "HelperStructs/Helper.h"
-#include "HelperStructs/CSettingsStorage.h"
-#include "HelperStructs/Style.h"
-#include "HelperStructs/globals.h"
+class AVTPlayer;
+class CSettingsStorage;
+class DirBrowser;
+class GUI_Player;
+class GUI_Playlist;
+class MetaData;
+class OHProductQO;
+class OHRadioQO;
+class OHTimeQO;
+class OHVolumeQO;
+class Playlist;
+class RenderingControlQO;
+class SongcastTool;
+class UpplayNotifications;
 
 class Application : public QObject
 {
-    Q_OBJECT
-
-    public:
-    Application(QApplication* qapp, int n_files, QTranslator* translator, 
-                QObject *parent = 0);
-    virtual ~Application();
-
-signals:
-    
-public slots:
-    void chooseRenderer();
-    void reconnectOrChoose();
-
-private:
-    GUI_Player   *m_player;
-    Playlist     *m_playlist;
-    DirBrowser    *m_cdb;
-
-    RenderingControlQO *m_rdco;
-    AVTPlayer    *m_avto;
-
-    OHPlayer     *m_ohplo;
-    OHTimeQO     *m_ohtmo;
-    OHVolumeQO   *m_ohvlo;
-
-    GUI_Playlist *m_ui_playlist;
-
-    CSettingsStorage *m_settings;
-    QApplication *m_app;
-
-    bool                 m_initialized;
-
-    void init_connections();
-    void renderer_connections();
-    bool setupRenderer(const std::string& uid);
+    Q_OBJECT;
 
 public:
-    void setFiles2Play(QStringList filelist);
-    QMainWindow* getMainWindow();
-    bool is_initialized();
+    Application(QApplication* qapp, QObject *parent = 0);
+    virtual ~Application();
 
+    bool is_initialized();
+                        
+    void getIdleMeta(MetaData* mdp);
+                        
+public slots:
+    void chooseRenderer();
+    void chooseSource();
+    void openSongcast();
+    void reconnectOrChoose();
+    void onSourceTypeChanged(OHProductQO::SourceType);
+    void onDirSortOrder();
+    
 private:
-    QString getVersion();
+
+    GUI_Player   *m_player;
+    std::shared_ptr<Playlist> m_playlist;
+    DirBrowser   *m_cdb;
+
+    UPnPClient::MRDH    m_rdr;
+    RenderingControlQO *m_rdco;
+    AVTPlayer    *m_avto;
+    OHTimeQO     *m_ohtmo;
+    OHVolumeQO   *m_ohvlo;
+    OHProductQO  *m_ohpro;
+    
+    GUI_Playlist *m_ui_playlist;
+    SongcastTool *m_sctool;
+    UpplayNotifications *m_notifs;
+    
+    CSettingsStorage *m_settings;
+    QApplication     *m_app;
+
+    bool             m_initialized;
+    // Can we send titles into the playlist (e.g. not OHradio).
+    bool             m_playlistIsPlaylist;
+    OHProductQO::SourceType m_ohsourcetype;
+    QString          m_renderer_friendly_name;
+
+    void clear_renderer();
+    void init_connections();
+    void renderer_connections();
+    void playlist_connections();
+    bool setupRenderer(const std::string& uid);
+    void createPlaylistForOpenHomeSource();
+    void chooseSourceOH();
+    void chooseSourceAVT();
 };
 
 
 #endif // APPLICATION_H
-

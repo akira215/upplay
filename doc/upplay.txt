@@ -1,4 +1,7 @@
-= The Upplay Qt-X11-Unix UPnP audio control point
+= Upplay manual
+:toc:
+
+== Overview
 
 image::legend-upplay-main.png[]
 
@@ -6,6 +9,9 @@ image::legend-upplay-main.png[]
 
 Play, Pause, Stop, Next, Previous, Seek, and Adjust volume. I would guess that
 these don't need explanations.
+
+Most elements displaying information about the current track have tooltips
+which can display a bigger and more readable version.
 
 == Playlist section
 
@@ -15,6 +21,9 @@ Playlist entries:
 - Click entry, then click the play button to play
 - Select and drag-drop to reorder
 - Right click and select 'Remove' to delete current selection
+- Right click and select 'Sort by track number' to reorder tracks (useful
+  when tracks from an album directory were sent in wrong order by the Media
+  Server).
 
 Playlist buttons:
 
@@ -28,7 +37,7 @@ Playlist buttons:
   entries. Not too sure what this is good for...
 
 You can clear the current playlist by clicking the broom icon above it on
-the left.
+the right.
 
 == Directory browser section
 
@@ -47,19 +56,32 @@ current playlist add mode.
 
 Left-Clicking a directory title will get you there.
 
-Right-clicking a track title will propose three actions:
+Right-clicking a track title will propose the following actions:
 
- - Send to playlist: same as left-clicking.
- - Send all to playlist: send all tracks from this directory.
- - Send all from here to playlist: this track and the following ones go to
+ - `Back`
+ - `Send to playlist`: same as left-clicking.
+ - `Send all to playlist`: send all tracks from this directory.
+ - `Send all from here to playlist`: this track and the following ones go to
    the playlist.
+ 
+Right-clicking a directory (in the list or in the path) will propose the
+following actions:
 
-Right-clicking a directory (in the list or in the path) will propose two
-actions:
-
-- Send to playlist: this is a recursive walk, it will send all tracks from
+- `Back`
+- `Send to playlist`: this is a recursive walk, it will send all tracks from
   the subtree to the playlist. Don't do this at the root of a big tree...
-- Open in new tab.
+- `Open in new tab`.
+- `Random play by tracks`: this is analogous to `Send to playlist`, but the
+   list is shuffled, then sent to the Renderer by slices (of 30 tracks). The
+   slicing is so that so you can use a very big list without swamping the
+   renderer. 
+- `Random play by groups`: this will play groups of tracks, corresponding to
+  the lowest level of directories in the subtree, typically albums, but
+  these may also be MinimServer Groups for example.
+- `Stop random play`: if currently playing.
+
+While in "Random play by group" mode, the playlist broom tooltip displays
+the next group. Clicking the button will skip to it.
 
 Right-clicking empty space will propose to go back (or up).
 
@@ -71,32 +93,125 @@ losing the current display.
 `^f` or `/` will open the search panel, `Esc` will close it (or the x-cross
 button at the right).
 
-link:searching.html[more detail on search].
+== Searching 
+
+Upplay supports two search modes:
+ 
+- Inside the current directory page: this is handy to quickly skip inside
+  a long list.
+- Server search.
+
+The search panel is located at the bottom of the library window (the one on
+the right), and normally hidden. You can open it by the following actions:
+ 
+- Typing `/` inside the library window.
+- Typing `Ctrl+f` inside the library window.
+- Using the View menu
+
+Not all servers support search (e.g, MediaTomb does not, Minidlna does,
+etc.).
+
+You can close the panel by the following actions:
+
+- Typing `Esc` (the Escape key).
+- Clicking the x-cross icon on the right of the panel
+- Using the `View` menu.
+
+When the search panel opens for the first time, the panel is in local
+search mode. Typing inside the search entry area will try to find matches
+in the page. You can use the two arrow buttons or type `F3` or `Shift+F3`
+to find the next or previous match.
+
+In server mode, the search panel will let you enter a search string and the
+kind of field inside which you want to search (the combobox on the right,
+Artist/Album/Title). Type `Enter` or click the search button to start the
+search. 
+
+The results are displayed just like a directory listing and can be
+used in the same way (including opening tabs for directory listings, etc.).
+
+Server searches are always relative to the first directory earlier in the
+path, never to another search.
+If your search yields nothing, one of the things to check is that you are
+high enough in the tree (not searching a single directory).
+
+Also *_space characters are significant in the search entry_*. This has a
+capacity for trouble but it can also be a great help when trying to match
+words (there are no standard UPnP ways to specify word matches, or anchor a
+search at the beginning or end of a field).
 
 == Tab bar section
 
 Clicking the big plus sign will open a new tab. Clicking a tab's cross
 sign will close it...
 
-
+[[menus]]
 == Menus
 
 File:
 
-- Change Media Renderer will let you do just this. You will see a dialog
+- `Change Media Renderer` will let you do just this. You will see a dialog
   with the list of renderers currently seen on the network. After choosing
   one, you may decide that the current *upplay* playlist will replace the
   one or the new renderer, or be appended to it by checking the appropriate
   places. Double-clicking a renderer will get you there too.
-- Save / Load playlist will let you save the current playlist to a local
+- `Select Source` is only activated if the current Renderer supports
+  OpenHome, and will let you select the Source among the available ones
+  (`Playlist`, `Radio` etc.).
+- `Save / Load playlist` will let you save the current playlist to a local
   file, or load one which you previously saved.
+- `Open Songcast Tool` will open a dialog for managing the connections
+  between Linn Songcast Senders or Receivers. link:songcast.html[more
+  details here].
+- `View`  lets you elect to hide the right panel (directory listing), change
+   the color scheme for a dark one and other interesting experiences. Also
+   a number of Preferences can be adjusted from the appropriately named
+   submenu. 
 
-View:  you can elect to hide the right panel (directory listing), change
-the color scheme for a dark one and other interesting experiences.
+And `Help`, there is no help...
 
-Preferences should be reasonably self-explaining.
+[[keyboard]]
+== Keyboard shortcuts
 
-And help, there is no help...
+- Space/MediaTogglePlayPause/MediaPlay/MediaPause : toggle play/pause.
+- Ctl+Right / MediaNext : next track.
+- Ctl+Left / MediaPrevious : previous track.
+- Ctl+Space : stop.    
+- Ctl+Up / Plus : volume increase.
+- Ctl+Down/ Minus : volume decrease.
+- Right : seek forward a few secs.
+- Left : seek backward a few secs.
 
+[[hiresadjust]]
+== Adjusting the font sizes on high resolution displays
 
-  
+Most people will find that the font sizes (and buttons/icons) are too small
+on high DPI displays.
+
+As of version 1.2.5, the GUI can be partially adjusted by editing two style
+sheet files. To adjust the font sizes:
+
+- Edit `/usr/share/upplay/cdbrowser/cdbrowser.css`, and uncomment the
+  "font-size" directive at the top. Adjust the size to taste, meaning that
+  the line should look like the following (with your preferred value in
+  place of 30):
+
+    font-size: 30pt;
+    
+- Edit `/usr/share/upplay/common.css` and adjust the 6 font-size
+  directives. An adequate approach will usually be to multiply the sizes by
+  some constant factor (e.g.: 2 ...).
+
+On Windows, use 'notepad' or an equivalent pure text editor to edit the
+files, which are located in the 'share' and 'share\cdbrowser'
+subdirectories of the top installation directory (e.g: 'C:\Program Files
+(x86)\Upplay\'). You need to specify "all files" when opening the files,
+because notepad does not list '.css' files by default (only '.txt').
+
+The adjustment is not perfect for now: the player section does not update
+its size, which means that some titles will be truncated (in the top left
+area), and the icon sizes are unchanged. Arbitrary text truncation may
+happen in places. This will hopefully be improved in a future release.
+
+There are other, system-based, approaches described on the following Qt page:
+http://doc.qt.io/qt-5/highdpi.html

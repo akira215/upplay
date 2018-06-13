@@ -1,5 +1,3 @@
-/* GUI_PlaylistEntrySmall.cpp */
-
 /* Copyright (C) 2011  Lucio Carreras
  *
  * This file is part of sayonara player
@@ -24,28 +22,35 @@
 #include "HelperStructs/Helper.h"
 
 
-GUI_PlaylistEntrySmall::GUI_PlaylistEntrySmall(QWidget* parent) : GUI_PlaylistEntry(parent){
+GUI_PlaylistEntrySmall::GUI_PlaylistEntrySmall(QWidget* parent)
+    : GUI_PlaylistEntry(parent)
+{
     this->ui = new Ui::PlaylistEntrySmall();
-	this->ui->setupUi(this);
+    this->ui->setupUi(this);
 }
 
-GUI_PlaylistEntrySmall::~GUI_PlaylistEntrySmall() {
-	delete this->ui;
+GUI_PlaylistEntrySmall::~GUI_PlaylistEntrySmall()
+{
+    delete this->ui;
 }
+int GUI_PlaylistEntrySmall::fontheight()
+{
+    return ui->pl_lab_title->fontMetrics().height();
+}
+void GUI_PlaylistEntrySmall::setContent(const MetaData& md, int idx)
+{
+    QString titlestr;
 
-void GUI_PlaylistEntrySmall::setContent(const MetaData& md, int idx){
-
-	QString titlestr;
-
-	if(CSettingsStorage::getInstance()->getPlaylistNumbers())
+    if (CSettingsStorage::getInstance()->getPlaylistNumbers()) {
         titlestr = QString::number(idx) + ". " + md.title.trimmed();
-
-	else
+    } else {
         titlestr = md.title.trimmed();
+    }
 
-    this->ui->lab_title->setText(titlestr);
-    this->ui->lab_artist->setText(md.artist.trimmed());
-    this->ui->lab_time->setText(Helper::cvtMsecs2TitleLengthString(md.length_ms));
+    this->ui->pl_lab_title->setText(titlestr);
+    this->ui->pl_lab_artist->setText(md.artist.trimmed());
+    this->ui->pl_lab_time->setText(
+        Helper::cvtMsecs2TitleLengthString(md.length_ms));
 }
 
 

@@ -29,6 +29,8 @@
 #include "libupnpp/control/cdircontent.hxx"
 #include "libupnpp/soaphelp.hxx"
 
+#include "ohpool.h"
+
 class OHPLMetadata {
 public:
     virtual std::string getDidl() const = 0;
@@ -65,7 +67,7 @@ public:
             // do this because it's quite possible that we emit the
             // first signal before we are connected
             m_curid = value;
-            emit trackIdChanged(value);
+            emit currentTrackId(value);
         } else if (!strcmp(nm, "TransportState")) {
             emit tpStateChanged(value);
         } else if (!strcmp(nm, "Shuffle")) {
@@ -99,6 +101,30 @@ public slots:
         if (idArray(&ids, &tp)) {
             onIdArrayChanged(ids);
         }
+    }
+
+    /// Read state from the remote. Used when starting up, to avoid
+    /// having to wait for events.
+    virtual void fetchState() {
+        std::vector<int> ids;
+        int tok;
+        if (idArray(&ids, &tok))
+            onIdArrayChanged(ids);
+        if (m_srv->id(&tok) == 0) {
+            m_curid = tok;
+            emit currentTrackId(tok);
+        }
+        UPnPClient::OHPlaylist::TPState tpst;
+        // Note: it seems that the initial value returned by
+        // MediaPlayer if the current playlist is empty is random
+        // (either error or "Playing").
+        // Only actually call transportState if the playlist is not empty,
+        // else just emit "stopped"
+        if (ids.size() && m_srv->transportState(&tpst) == 0) {
+            emit tpStateChanged(tpst);
+        } else {
+            emit tpStateChanged(UPnPClient::OHPlaylist::TPS_Stopped);
+        }            
     }
 
     // Ping renderer to check it's still there.
@@ -143,7 +169,15 @@ public slots:
     }
     virtual bool seekId(int i) {return m_srv->seekId(i) == 0;}
     virtual bool seekIndex(int i) {return m_srv->seekIndex(i) == 0;}
-    virtual bool clear() {return m_srv->deleteAll() == 0;}
+    virtual bool clear() {
+        int ret = m_srv->deleteAll();
+        // Not necessary with upmpdcli, but mediaplayer does not emit a
+        // tpstate change without it here, so this helps
+        m_srv->stop();
+        m_curid = 0;
+        emit tpStateChanged(UPnPClient::OHPlaylist::TPS_Stopped);
+        return ret == 0;
+    }
     virtual bool insert(int afterid, const std::string& uri, 
                         const std::string& didl, int *nid) {
         //qDebug() << "OHPL:: insert after " << afterid;
@@ -189,7 +223,7 @@ public slots:
     }
 
 signals:
-    void trackIdChanged(int);
+    void currentTrackId(int);
     void trackArrayChanged();
     void tpStateChanged(int);
     void shuffleChanged(bool);
@@ -202,108 +236,24 @@ signals:
 private slots:
 
     void onIdArrayChanged(std::vector<int> nids) {
-        //qDebug() << "OHPL::onIdArrayChanged: " << vtos(nids).c_str();
-
-        // We used to do nothing if the id array was unchanged, but
-        // this gained very little, and going through lets us
-        // re-read the current title metadata further on. This could
-        // have changed without an id change, for example if the renderer
-        // is upmpdcli and mpd is playing an internet radio (no qvers
-        // update when the title changes).
-#if 0
-        if (!m_forceUpdate && nids == m_idsv) {
-            //qDebug() << "OHPL::onIdArrayChanged: unchanged";
-            return;
-        }
-#endif
         m_forceUpdate = false;
-
-        // Clean up metapool entries not in ids. We build a set with
-        // the new ids list first. For small lists it does not matter,
-        // for big ones, this will prevent what would otherwise be a
-        // linear search the repeated search to make this
-        // quadratic. We're sort of O(n * log(n)) instead.
-        if (!m_metapool.empty() && !nids.empty()){
-            STD_UNORDERED_SET<int> tmpset(nids.begin(), nids.end());
-            for (STD_UNORDERED_MAP<int, UPnPClient::UPnPDirObject>::iterator it
-                     = m_metapool.begin(); it != m_metapool.end(); ) {
-                if (tmpset.find(it->first) == tmpset.end()) {
-                    it = m_metapool.erase(it);
-                } else {
-                    it++;
-                }
-            }
-        }
-
-        // Find ids for which we have no metadata. Always re-read current title
-        std::vector<int> unids; // unknown
-        for (std::vector<int>::iterator it = nids.begin(); 
-             it != nids.end(); it++) {
-            if (m_metapool.find(*it) == m_metapool.end() || m_curid == *it)
-                unids.push_back(*it);
-        }
-        if (!unids.empty()) {
-            //qDebug() << "OHPL::onIdArrayChanged: need metadata for: " 
-            //       << vtos(unids).c_str();
-        }
-        // Fetch needed metadata, 10 entries at a time
-        const unsigned int batchsize(10);
-        for (unsigned int i = 0; i < unids.size();) {
-            unsigned int j = 0;
-            std::vector<int> metaslice;
-            for (; j < batchsize && (i+j) < unids.size(); j++) {
-                metaslice.push_back(unids[i+j]);
-            }
-
-            //qDebug() << "OHPL::onIdArrayChanged: Requesting metadata for " 
-            //<< vtos(metaslice).c_str();
-            std::vector<UPnPClient::OHPlaylist::TrackListEntry> entries;
-            int ret;
-            if ((ret = m_srv->readList(metaslice, &entries))) {
-                qDebug() << "OHPL: readList failed: " << ret;
-                goto out;
-            }
-            for (std::vector<UPnPClient::OHPlaylist::TrackListEntry>::iterator
-                     it = entries.begin(); it != entries.end(); it++) {
-                //qDebug() << "OHPL: data for " << it->id << " " << 
-                //    it->dirent.m_title.c_str();
-                // Kazoo for example does not set a resource (uri)
-                // inside the dirent.  Set it from the uri field in
-                // this case.
-                if (it->dirent.m_resources.empty()) {
-                    UPnPClient::UPnPResource res;
-                    res.m_uri = it->url;
-                    it->dirent.m_resources.push_back(res);
-                }
-                m_metapool[it->id] = it->dirent;
-            }
-            i += j;
-        }
-
         m_idsv = nids;
+
+        if (!ohupdmetapool(nids, m_curid, m_metapool, m_srv))
+            return;
+
         qDebug() << "OHPL::onIdArrayChanged: emit trackArrayChanged(). " <<
             "idsv size" << m_idsv.size() << " pool size " << m_metapool.size();
         emit trackArrayChanged();
-        emit trackIdChanged(m_curid);
-    out:
-        return;
+        emit currentTrackId(m_curid);
     }
 
 protected:
     std::vector<int> m_idsv;
-    STD_UNORDERED_MAP<int, UPnPClient::UPnPDirObject> m_metapool;
+    std::unordered_map<int, UPnPClient::UPnPDirObject> m_metapool;
     int m_curid;
     bool m_forceUpdate;
     bool m_discardArrayEvents;
-
-    std::string vtos(std::vector<int> nids) {
-        std::string sids;
-        for (std::vector<int>::iterator it = nids.begin(); 
-             it != nids.end(); it++)
-            sids += UPnPP::SoapHelp::i2s(*it) + " ";
-        return sids;
-    }
-
 
 private:
     virtual bool idArray(std::vector<int> *ids, int *tokp) {

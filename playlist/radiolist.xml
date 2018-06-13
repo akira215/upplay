@@ -1,0 +1,907 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- Converted from MediaPlayer radiolist.json with
+http://www.utilities-online.info/xmltojson/ -->
+<radiolist>
+  <body>
+    <element>outline</element>
+    <text>URLs (1)</text>
+    <key>presetUrls</key>
+    <children>
+      <element>outline</element>
+      <type>link</type>
+      <text>Naim Radio</text>
+      <URL>http://37.130.228.60:8090/listen.pls</URL>
+      <guide_id>u46</guide_id>
+      <item>url</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s0q.png</image>
+      <preset_number>47</preset_number>
+      <preset_id>u46</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+  </body>
+  <body>
+    <element>outline</element>
+    <text>Shows (2)</text>
+    <key>shows</key>
+    <children>
+      <element>outline</element>
+      <type>link</type>
+      <text>The World at One</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?c=pbrowse&amp;id=p367</URL>
+      <guide_id>p367</guide_id>
+      <subtext>Current Affairs</subtext>
+      <genre_id>g238</genre_id>
+      <item>show</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/p367q.png</image>
+      <current_track>Current Affairs</current_track>
+      <preset_number>32</preset_number>
+      <preset_id>p367</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>link</type>
+      <text>Mike Sweeney</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?c=pbrowse&amp;id=p509857</URL>
+      <guide_id>p509857</guide_id>
+      <subtext>Join Mike Sweeney on BBC Radio Manchester.</subtext>
+      <genre_id>g29</genre_id>
+      <item>show</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/p509857q.png</image>
+      <current_track>Join Mike Sweeney on BBC Radio Manchester.</current_track>
+      <preset_number>46</preset_number>
+      <preset_id>p509857</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+  </body>
+  <body>
+    <element>outline</element>
+    <text>Stations (43)</text>
+    <key>stations</key>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>96.2 | The Revolution (Rock)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s45508</URL>
+      <bitrate>64</bitrate>
+      <reliability>97</reliability>
+      <guide_id>s45508</guide_id>
+      <subtext>Elliot Eastwick</subtext>
+      <genre_id>g19</genre_id>
+      <formats>mp3</formats>
+      <show_id>p300406</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s45508q.png</image>
+      <current_track>Elliot Eastwick</current_track>
+      <now_playing_id>s45508</now_playing_id>
+      <preset_number>1</preset_number>
+      <preset_id>s45508</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>1197 | Absolute Radio (Adult Contemporary)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s46593</URL>
+      <bitrate>128</bitrate>
+      <reliability>96</reliability>
+      <guide_id>s46593</guide_id>
+      <subtext>Discover Real Music</subtext>
+      <genre_id>g3</genre_id>
+      <formats>mp3</formats>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s16679q.png</image>
+      <now_playing_id>s46593</now_playing_id>
+      <preset_number>2</preset_number>
+      <preset_id>s46593</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>102.0 | Capital Manchester (Top 40/Pop)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s18587</URL>
+      <bitrate>128</bitrate>
+      <reliability>88</reliability>
+      <guide_id>s18587</guide_id>
+      <subtext>Sally Hudson</subtext>
+      <genre_id>g61</genre_id>
+      <formats>mp3</formats>
+      <show_id>p49041</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s18587q.png</image>
+      <current_track>Sally Hudson</current_track>
+      <now_playing_id>s18587</now_playing_id>
+      <preset_number>3</preset_number>
+      <preset_id>s18587</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>97.7 | XFM Manchester (Alternative Rock)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s81256</URL>
+      <bitrate>128</bitrate>
+      <reliability>93</reliability>
+      <guide_id>s81256</guide_id>
+      <subtext>XFM Breakfast Show with Tim Cocker</subtext>
+      <genre_id>g115</genre_id>
+      <formats>mp3</formats>
+      <show_id>p230020</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s81256q.png</image>
+      <current_track>XFM Breakfast Show with Tim Cocker</current_track>
+      <now_playing_id>s81256</now_playing_id>
+      <preset_number>4</preset_number>
+      <preset_id>s81256</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>1152 | Magic 1152 (Manchester) (Classic Hits)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s86683</URL>
+      <bitrate>48</bitrate>
+      <reliability>93</reliability>
+      <guide_id>s86683</guide_id>
+      <subtext>The Miracles - The Tears of a Clown</subtext>
+      <genre_id>g2755</genre_id>
+      <formats>mp3</formats>
+      <playing>The Miracles - The Tears of a Clown</playing>
+      <playing_image>http://d3tybumvrk5xfv.cloudfront.net/gn/6K4K1ZZ7TPd.jpg</playing_image>
+      <show_id>p230192</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s45639q.png</image>
+      <current_track>Ian Roberts</current_track>
+      <now_playing_id>s86683</now_playing_id>
+      <preset_number>5</preset_number>
+      <preset_id>s86683</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>Linn Radio (Variety)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s122119</URL>
+      <bitrate>320</bitrate>
+      <reliability>93</reliability>
+      <guide_id>s122119</guide_id>
+      <subtext>Tune in to High Quality Music</subtext>
+      <genre_id>g88</genre_id>
+      <formats>mp3</formats>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s122119q.png</image>
+      <now_playing_id>s122119</now_playing_id>
+      <preset_number>6</preset_number>
+      <preset_id>s122119</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>Linn Classical (Classical)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s122116</URL>
+      <bitrate>320</bitrate>
+      <reliability>96</reliability>
+      <guide_id>s122116</guide_id>
+      <subtext>Tune in to High Quality Music</subtext>
+      <genre_id>g5</genre_id>
+      <formats>mp3</formats>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s122116q.png</image>
+      <now_playing_id>s122116</now_playing_id>
+      <preset_number>7</preset_number>
+      <preset_id>s122116</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>Linn Jazz (Jazz)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s122120</URL>
+      <bitrate>320</bitrate>
+      <reliability>93</reliability>
+      <guide_id>s122120</guide_id>
+      <subtext>Tune in to High Quality Music</subtext>
+      <genre_id>g11</genre_id>
+      <formats>mp3</formats>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s122120q.png</image>
+      <now_playing_id>s122120</now_playing_id>
+      <preset_number>8</preset_number>
+      <preset_id>s122120</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>BBC Radio 1Xtra (Soul and R&amp;B)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s20277</URL>
+      <bitrate>48</bitrate>
+      <reliability>94</reliability>
+      <guide_id>s20277</guide_id>
+      <subtext>1Xtra Breakfast Show with Twin B</subtext>
+      <genre_id>g18</genre_id>
+      <formats>wma</formats>
+      <show_id>p180374</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s20277q.png</image>
+      <current_track>1Xtra Breakfast Show with Twin B</current_track>
+      <now_playing_id>s20277</now_playing_id>
+      <preset_number>10</preset_number>
+      <preset_id>s20277</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>98.2 | BBC Radio 1 (Top 40/Pop)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s83464</URL>
+      <bitrate>48</bitrate>
+      <reliability>97</reliability>
+      <guide_id>s83464</guide_id>
+      <subtext>Scott Mills</subtext>
+      <genre_id>g61</genre_id>
+      <formats>wma</formats>
+      <show_id>p67936</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s24939q.png</image>
+      <current_track>Scott Mills</current_track>
+      <now_playing_id>s83464</now_playing_id>
+      <preset_number>11</preset_number>
+      <preset_id>s83464</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>88.6 | BBC Radio 2 (Adult Contemporary)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s83463</URL>
+      <bitrate>48</bitrate>
+      <reliability>97</reliability>
+      <guide_id>s83463</guide_id>
+      <subtext>Chris Evans Breakfast</subtext>
+      <genre_id>g3</genre_id>
+      <formats>wma</formats>
+      <show_id>p223968</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s24940q.png</image>
+      <current_track>Chris Evans Breakfast</current_track>
+      <now_playing_id>s83463</now_playing_id>
+      <preset_number>12</preset_number>
+      <preset_id>s83463</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>91.3 | BBC Radio 3 (Classical)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s24941</URL>
+      <bitrate>48</bitrate>
+      <reliability>95</reliability>
+      <guide_id>s24941</guide_id>
+      <subtext>Breakfast</subtext>
+      <genre_id>g5</genre_id>
+      <formats>wma</formats>
+      <show_id>p515</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s24941q.png</image>
+      <current_track>Breakfast</current_track>
+      <now_playing_id>s24941</now_playing_id>
+      <preset_number>13</preset_number>
+      <preset_id>s24941</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>93.0 | BBC Radio 4 (National News)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s83461</URL>
+      <bitrate>48</bitrate>
+      <reliability>96</reliability>
+      <guide_id>s83461</guide_id>
+      <subtext>Today</subtext>
+      <genre_id>g3124</genre_id>
+      <formats>wma</formats>
+      <show_id>p353</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s25419q.png</image>
+      <current_track>Today</current_track>
+      <now_playing_id>s83461</now_playing_id>
+      <preset_number>14</preset_number>
+      <preset_id>s83461</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>198 | BBC Radio 4 LW (Public Radio)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s50577</URL>
+      <bitrate>48</bitrate>
+      <reliability>96</reliability>
+      <guide_id>s50577</guide_id>
+      <subtext>Today</subtext>
+      <genre_id>g266</genre_id>
+      <formats>wma</formats>
+      <show_id>p353</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s50577q.png</image>
+      <current_track>Today</current_track>
+      <now_playing_id>s50577</now_playing_id>
+      <preset_number>15</preset_number>
+      <preset_id>s50577</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>BBC Radio 4 Extra (Comedy)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s6839</URL>
+      <bitrate>48</bitrate>
+      <reliability>97</reliability>
+      <guide_id>s6839</guide_id>
+      <subtext>Steptoe and Son</subtext>
+      <genre_id>g209</genre_id>
+      <formats>wma</formats>
+      <show_id>p180425</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s6839q.png</image>
+      <current_track>Steptoe and Son</current_track>
+      <now_playing_id>s6839</now_playing_id>
+      <preset_number>16</preset_number>
+      <preset_id>s6839</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>909 | BBC Radio 5 live (Sports Talk)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s24943</URL>
+      <bitrate>48</bitrate>
+      <reliability>95</reliability>
+      <guide_id>s24943</guide_id>
+      <subtext>5 live Breakfast</subtext>
+      <genre_id>g2723</genre_id>
+      <formats>wma</formats>
+      <show_id>p113</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s24943q.png</image>
+      <current_track>5 live Breakfast</current_track>
+      <now_playing_id>s24943</now_playing_id>
+      <preset_number>17</preset_number>
+      <preset_id>s24943</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>BBC Radio 5 live sports extra (Sports)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s50459</URL>
+      <bitrate>48</bitrate>
+      <reliability>92</reliability>
+      <guide_id>s50459</guide_id>
+      <subtext>5 live Formula 1</subtext>
+      <genre_id>g323</genre_id>
+      <formats>wma</formats>
+      <show_id>p190792</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s50459q.png</image>
+      <current_track>5 live Formula 1</current_track>
+      <now_playing_id>s50459</now_playing_id>
+      <preset_number>18</preset_number>
+      <preset_id>s50459</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>BBC Radio 6 Music (AAA)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s44491</URL>
+      <bitrate>48</bitrate>
+      <reliability>96</reliability>
+      <guide_id>s44491</guide_id>
+      <subtext>Shaun Keaveny</subtext>
+      <genre_id>g111</genre_id>
+      <formats>wma</formats>
+      <show_id>p2115</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s44491q.png</image>
+      <current_track>Shaun Keaveny</current_track>
+      <now_playing_id>s44491</now_playing_id>
+      <preset_number>19</preset_number>
+      <preset_id>s44491</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>BBC World Service (World News)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s50646</URL>
+      <bitrate>32</bitrate>
+      <reliability>98</reliability>
+      <guide_id>s50646</guide_id>
+      <subtext>Newsday</subtext>
+      <genre_id>g3125</genre_id>
+      <formats>mp3,wma</formats>
+      <show_id>p441096</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s50646q.png</image>
+      <current_track>Newsday</current_track>
+      <now_playing_id>s50646</now_playing_id>
+      <preset_number>20</preset_number>
+      <preset_id>s50646</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>95.1 | BBC Manchester (Community)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s18214</URL>
+      <bitrate>48</bitrate>
+      <reliability>98</reliability>
+      <guide_id>s18214</guide_id>
+      <subtext>Mike Shaft</subtext>
+      <genre_id>g249</genre_id>
+      <formats>wma</formats>
+      <show_id>p182033</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s18214q.png</image>
+      <current_track>Mike Shaft</current_track>
+      <now_playing_id>s18214</now_playing_id>
+      <preset_number>21</preset_number>
+      <preset_id>s18214</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>1107 | talkSPORT (Sports Talk)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s46580</URL>
+      <bitrate>32</bitrate>
+      <reliability>99</reliability>
+      <guide_id>s46580</guide_id>
+      <subtext>The Alan Brazil Sports Breakfast</subtext>
+      <genre_id>g2723</genre_id>
+      <formats>mp3</formats>
+      <show_id>p196863</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s17077q.png</image>
+      <current_track>The Alan Brazil Sports Breakfast</current_track>
+      <now_playing_id>s46580</now_playing_id>
+      <preset_number>22</preset_number>
+      <preset_id>s46580</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>100.9 | Classic FM (Classical)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s8439</URL>
+      <bitrate>128</bitrate>
+      <reliability>97</reliability>
+      <guide_id>s8439</guide_id>
+      <subtext>Classic FM's More Music Breakfast with Tim Lihoreau</subtext>
+      <genre_id>g5</genre_id>
+      <formats>mp3</formats>
+      <show_id>p54608</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s8439q.png</image>
+      <current_track>Classic FM's More Music Breakfast with Tim Lihoreau</current_track>
+      <now_playing_id>s8439</now_playing_id>
+      <preset_number>23</preset_number>
+      <preset_id>s8439</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>Absolute Classic Rock (Classic Rock)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s49815</URL>
+      <bitrate>128</bitrate>
+      <reliability>99</reliability>
+      <guide_id>s49815</guide_id>
+      <subtext>Back-soon - Inanb</subtext>
+      <genre_id>g54</genre_id>
+      <formats>mp3</formats>
+      <playing>Back-soon - Inanb</playing>
+      <show_id>p149945</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s49815q.png</image>
+      <current_track>Christian O'Connell Breakfast Show</current_track>
+      <now_playing_id>s49815</now_playing_id>
+      <preset_number>24</preset_number>
+      <preset_id>s49815</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>Steve Penk Windup Channel (Spoken)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s114215</URL>
+      <bitrate>64</bitrate>
+      <reliability>21</reliability>
+      <guide_id>s114215</guide_id>
+      <subtext>Steve Penk Windup Channel...</subtext>
+      <genre_id>g2</genre_id>
+      <formats>mp3</formats>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s114215q.png</image>
+      <now_playing_id>s114215</now_playing_id>
+      <preset_number>25</preset_number>
+      <preset_id>s114215</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>103.0 | Key 103 (Top 40/Pop)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s6910</URL>
+      <bitrate>48</bitrate>
+      <reliability>96</reliability>
+      <guide_id>s6910</guide_id>
+      <subtext>Avicii - Hey Brother</subtext>
+      <genre_id>g61</genre_id>
+      <formats>mp3</formats>
+      <playing>Avicii - Hey Brother</playing>
+      <playing_image>http://d3tybumvrk5xfv.cloudfront.net/gn/MTLKT2C1WPd.jpg</playing_image>
+      <show_id>p229905</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s6910q.png</image>
+      <current_track>Mike &amp; Chelsea In The Morning</current_track>
+      <now_playing_id>s6910</now_playing_id>
+      <preset_number>26</preset_number>
+      <preset_id>s6910</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>Absolute Radio 60s (60's)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s150147</URL>
+      <bitrate>128</bitrate>
+      <reliability>99</reliability>
+      <guide_id>s150147</guide_id>
+      <subtext>Christian O'Connell Breakfast Show</subtext>
+      <genre_id>g407</genre_id>
+      <formats>mp3</formats>
+      <show_id>p149945</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s150147q.png</image>
+      <current_track>Christian O'Connell Breakfast Show</current_track>
+      <now_playing_id>s150147</now_playing_id>
+      <preset_number>27</preset_number>
+      <preset_id>s150147</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>Absolute Radio 70s (70's)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s150148</URL>
+      <bitrate>128</bitrate>
+      <reliability>96</reliability>
+      <guide_id>s150148</guide_id>
+      <subtext>Back-soon - Inanb</subtext>
+      <genre_id>g92</genre_id>
+      <formats>mp3</formats>
+      <playing>Back-soon - Inanb</playing>
+      <show_id>p149945</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s150148q.png</image>
+      <current_track>Christian O'Connell Breakfast Show</current_track>
+      <now_playing_id>s150148</now_playing_id>
+      <preset_number>28</preset_number>
+      <preset_id>s150148</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>Absolute 80s (80's)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s117787</URL>
+      <bitrate>128</bitrate>
+      <reliability>97</reliability>
+      <guide_id>s117787</guide_id>
+      <subtext>Back-soon - Inanb</subtext>
+      <genre_id>g42</genre_id>
+      <formats>mp3</formats>
+      <playing>Back-soon - Inanb</playing>
+      <show_id>p149945</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s117787q.png</image>
+      <current_track>Christian O'Connell Breakfast Show</current_track>
+      <now_playing_id>s117787</now_playing_id>
+      <preset_number>29</preset_number>
+      <preset_id>s117787</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>Absolute Radio 90s (90's)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s126362</URL>
+      <bitrate>128</bitrate>
+      <reliability>98</reliability>
+      <guide_id>s126362</guide_id>
+      <subtext>Christian O'Connell Breakfast Show</subtext>
+      <genre_id>g2677</genre_id>
+      <formats>mp3</formats>
+      <show_id>p149945</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s126362q.png</image>
+      <current_track>Christian O'Connell Breakfast Show</current_track>
+      <now_playing_id>s126362</now_playing_id>
+      <preset_number>30</preset_number>
+      <preset_id>s126362</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>Absolute Radio 00s (00's)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s131272</URL>
+      <bitrate>128</bitrate>
+      <reliability>98</reliability>
+      <guide_id>s131272</guide_id>
+      <subtext>Christian O'Connell Breakfast Show</subtext>
+      <genre_id>g2754</genre_id>
+      <formats>mp3</formats>
+      <show_id>p149945</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s131272q.png</image>
+      <current_track>Christian O'Connell Breakfast Show</current_track>
+      <now_playing_id>s131272</now_playing_id>
+      <preset_number>31</preset_number>
+      <preset_id>s131272</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>181.FM Beatles (60's)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s113658</URL>
+      <bitrate>128</bitrate>
+      <reliability>98</reliability>
+      <guide_id>s113658</guide_id>
+      <subtext>The Beatles - The Long and Winding Road</subtext>
+      <genre_id>g407</genre_id>
+      <formats>mp3,wma</formats>
+      <playing>The Beatles - The Long and Winding Road</playing>
+      <playing_image>http://d3tybumvrk5xfv.cloudfront.net/gn/BMJCH5X3VDd.jpg</playing_image>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s113658q.png</image>
+      <now_playing_id>s113658</now_playing_id>
+      <preset_number>33</preset_number>
+      <preset_id>s113658</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>Ministry of Sound Radio (Electronic and Dance)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s2262</URL>
+      <bitrate>56</bitrate>
+      <reliability>95</reliability>
+      <guide_id>s2262</guide_id>
+      <subtext>Ministry of Sound Non-Stop</subtext>
+      <genre_id>g59</genre_id>
+      <formats>mp3</formats>
+      <show_id>p319606</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s2262q.png</image>
+      <current_track>Ministry of Sound Non-Stop</current_track>
+      <now_playing_id>s2262</now_playing_id>
+      <preset_number>34</preset_number>
+      <preset_id>s2262</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>100.0 | KISS FM UK (Top 40/Pop)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s6004</URL>
+      <bitrate>48</bitrate>
+      <reliability>93</reliability>
+      <guide_id>s6004</guide_id>
+      <subtext>John Newman - Love Me Again</subtext>
+      <genre_id>g61</genre_id>
+      <formats>mp3</formats>
+      <playing>John Newman - Love Me Again</playing>
+      <playing_image>http://d3tybumvrk5xfv.cloudfront.net/gn/5PMCCRMCVCd.jpg</playing_image>
+      <show_id>p191376</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s6004q.png</image>
+      <current_track>Rickie, Melvin &amp; Charlie in the Morning</current_track>
+      <now_playing_id>s6004</now_playing_id>
+      <preset_number>35</preset_number>
+      <preset_id>s6004</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>106.1 | Real Radio XS Manchester (Classic Rock)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s91723</URL>
+      <bitrate>64</bitrate>
+      <reliability>98</reliability>
+      <guide_id>s91723</guide_id>
+      <subtext>Manchester's Classic Rock Station</subtext>
+      <genre_id>g54</genre_id>
+      <formats>mp3</formats>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s91723q.png</image>
+      <now_playing_id>s91723</now_playing_id>
+      <preset_number>36</preset_number>
+      <preset_id>s91723</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>100.4 | Smooth North West (Soul and R&amp;B)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s45501</URL>
+      <bitrate>128</bitrate>
+      <reliability>78</reliability>
+      <guide_id>s45501</guide_id>
+      <subtext>Breakfast with Eamonn</subtext>
+      <genre_id>g18</genre_id>
+      <formats>mp3</formats>
+      <show_id>p597051</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s221117q.png</image>
+      <current_track>Breakfast with Eamonn</current_track>
+      <now_playing_id>s45501</now_playing_id>
+      <preset_number>37</preset_number>
+      <preset_id>s45501</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>Radio Caroline (Classic Rock)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s10517</URL>
+      <bitrate>128</bitrate>
+      <reliability>98</reliability>
+      <guide_id>s10517</guide_id>
+      <subtext>Tony Paul</subtext>
+      <genre_id>g54</genre_id>
+      <formats>mp3,wma</formats>
+      <show_id>p239068</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s10517q.png</image>
+      <current_track>Tony Paul</current_track>
+      <now_playing_id>s10517</now_playing_id>
+      <preset_number>38</preset_number>
+      <preset_id>s10517</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>Offshore Radio Sounds (Nostalgia)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s141022</URL>
+      <bitrate>96</bitrate>
+      <reliability>99</reliability>
+      <guide_id>s141022</guide_id>
+      <subtext>Offshore Radio Sounds 24...</subtext>
+      <genre_id>g215</genre_id>
+      <formats>mp3</formats>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s141022q.png</image>
+      <now_playing_id>s141022</now_playing_id>
+      <preset_number>39</preset_number>
+      <preset_id>s141022</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>102.3 | Radio Umea (Variety)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s113390</URL>
+      <bitrate>128</bitrate>
+      <reliability>87</reliability>
+      <guide_id>s113390</guide_id>
+      <subtext>Swedish</subtext>
+      <genre_id>g88</genre_id>
+      <formats>mp3</formats>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s113390q.png</image>
+      <now_playing_id>s113390</now_playing_id>
+      <preset_number>40</preset_number>
+      <preset_id>s113390</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>Radio 10 Classic (Oldies)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s130799</URL>
+      <bitrate>128</bitrate>
+      <reliability>71</reliability>
+      <guide_id>s130799</guide_id>
+      <subtext>Läsarsånger och väckelsetoner</subtext>
+      <genre_id>g16</genre_id>
+      <formats>mp3</formats>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s130799q.png</image>
+      <now_playing_id>s130799</now_playing_id>
+      <preset_number>41</preset_number>
+      <preset_id>s130799</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>94.4 | Salford City Radio (Local Music)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s67827</URL>
+      <bitrate>64</bitrate>
+      <reliability>96</reliability>
+      <guide_id>s67827</guide_id>
+      <subtext>The Breakfast Club</subtext>
+      <genre_id>g154</genre_id>
+      <formats>mp3</formats>
+      <show_id>p537469</show_id>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s67827q.png</image>
+      <current_track>The Breakfast Club</current_track>
+      <now_playing_id>s67827</now_playing_id>
+      <preset_number>42</preset_number>
+      <preset_id>s67827</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>106.9 | Silk 106.9 (Top 40/Pop)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s45584</URL>
+      <bitrate>128</bitrate>
+      <reliability>97</reliability>
+      <guide_id>s45584</guide_id>
+      <subtext>Cheshire's Local Radio Station</subtext>
+      <genre_id>g61</genre_id>
+      <formats>mp3</formats>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s45584q.png</image>
+      <now_playing_id>s45584</now_playing_id>
+      <preset_number>43</preset_number>
+      <preset_id>s45584</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>97.2 | Wythenshawe FM (Local Music)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s37352</URL>
+      <bitrate>96</bitrate>
+      <reliability>92</reliability>
+      <guide_id>s37352</guide_id>
+      <subtext>Radio For The People, By The People !</subtext>
+      <genre_id>g154</genre_id>
+      <formats>mp3</formats>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s37352q.png</image>
+      <now_playing_id>s37352</now_playing_id>
+      <preset_number>44</preset_number>
+      <preset_id>s37352</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+    <children>
+      <element>outline</element>
+      <type>audio</type>
+      <text>Travel Radio (Traffic)</text>
+      <URL>http://opml.radiotime.com/Tune.ashx?id=s143118</URL>
+      <bitrate>48</bitrate>
+      <reliability>98</reliability>
+      <guide_id>s143118</guide_id>
+      <subtext>Live travel information for the UK</subtext>
+      <genre_id>g406</genre_id>
+      <formats>mp3</formats>
+      <item>station</item>
+      <image>http://d1i6vahw24eb07.cloudfront.net/s143118q.png</image>
+      <now_playing_id>s143118</now_playing_id>
+      <preset_number>45</preset_number>
+      <preset_id>s143118</preset_id>
+      <is_preset>true</is_preset>
+    </children>
+  </body>
+</radiolist>

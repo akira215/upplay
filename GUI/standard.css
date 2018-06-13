@@ -28,7 +28,3 @@ QPushButton[flat=true]:pressed{
                                       stop:0.7 rgba(243, 132, 26, 255), 
                                       stop:1 rgba(255, 255, 255, 0));
 }
-
-QTabBar::close-button {
-     image: url(:/icons/cross.png)
- }

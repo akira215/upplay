@@ -8,3 +8,4 @@ manifest.txt
 debian
 upplay
 qrc_upplay.cpp
+doc/upplay-releases.html

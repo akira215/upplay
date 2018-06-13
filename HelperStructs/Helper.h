@@ -17,6 +17,10 @@
  */
 #ifndef _HELPER_H
 #define _HELPER_H
+#include <time.h>
+
+#include <string>
+#include <vector>
 
 #include <QString>
 #include <QList>
@@ -34,7 +38,9 @@ QString cvtMsecs2TitleLengthString(long int msec, bool colon = true,
 QString cvtQString2FirstUpper(QString str);
 QString calc_filesize_str(qint64 filesize);
 
-QString getIconPath();
+void setStyleSubDir(const QString& subd);
+QString getIconDir();
+QString getIconPath(const QString& nm);
 QString getSharePath();
 QString getHomeDataPath();
 QString createLink(QString name, QString target = "", bool underline = true);
@@ -61,14 +67,17 @@ template <typename T> QList<T> randomize_list(const QList<T>& list)
     return list_copy;
 }
 
-inline bool checkTrack(const MetaData&)
-{
-    return true;
-}
-
 bool read_file_into_str(QString filename, QString* content);
+// Escape things that would look like HTML markup
+std::string escapeHtml(const string &in);
+QString escapeHtml(const QString& in);
 
 };
 
+
+template <class T> void stringsToString(const T &tokens, std::string &s);
+template <class T> std::string stringsToString(const T &tokens);
+
+extern std::string ivtos(const std::vector<int>& nids);
 
 #endif

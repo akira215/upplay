@@ -1,18 +1,18 @@
 /* Copyright (C) 2014 J.F.Dockes
- *	 This program is free software; you can redistribute it and/or modify
- *	 it under the terms of the GNU General Public License as published by
- *	 the Free Software Foundation; either version 2 of the License, or
- *	 (at your option) any later version.
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
  *
- *	 This program is distributed in the hope that it will be useful,
- *	 but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	 GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *	 You should have received a copy of the GNU General Public License
- *	 along with this program; if not, write to the
- *	 Free Software Foundation, Inc.,
- *	 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the
+ *   Free Software Foundation, Inc.,
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #ifndef _AVTRANSPORT_QO_INCLUDED
 #define _AVTRANSPORT_QO_INCLUDED
@@ -35,7 +35,7 @@ public:
 };
 
 class AVTransportQO : public QObject, public UPnPClient::VarEventReporter {
-Q_OBJECT
+    Q_OBJECT;
 
 public:
     AVTransportQO(UPnPClient::AVTH avt, QObject *parent = 0)
@@ -43,36 +43,51 @@ public:
           m_cursecs(-1),
           m_sent_end_of_track_sig(false),
           m_in_ending(false),
-          m_tpstate(AVTransport::Unknown)
-    {
+          m_tpstate(AVTransport::Unknown) {
+
         m_timer = new QTimer(this);
         connect(m_timer, SIGNAL(timeout()), this, SLOT(update()));
         m_timer->start(1000);
-        qRegisterMetaType<UPnPClient::UPnPDirObject>("UPnPClient::UPnPDirObject");
+
+        qRegisterMetaType<UPnPClient::UPnPDirObject>
+            ("UPnPClient::UPnPDirObject");
+
         m_srv->installReporter(this);
-        // We are handling the playlist: set the renderer in "normal" mode.
+
+        // We are handling the playlist: set the renderer in "normal"
+        // mode. Actually, I don't think that this is relevant at all,
+        // we never consider that the renderer may have an internal
+        // playlist.
         m_srv->setPlayMode(UPnPClient::AVTransport::PM_Normal);
     }
+
     virtual ~AVTransportQO() {
         m_srv->installReporter(0);
     }
 
     const char *tpstatetostr(int tps) {
-        switch(tps) {
+        switch (tps) {
         default:
-        case UPnPClient::AVTransport::Unknown: return "Unknown";
-        case UPnPClient::AVTransport::Stopped: return "Stopped";
-        case UPnPClient::AVTransport::Playing: return "Playing";
-        case UPnPClient::AVTransport::Transitioning: return "Transitionning";
-        case UPnPClient::AVTransport::PausedPlayback: return "PausedPlay";
-        case UPnPClient::AVTransport::PausedRecording: return "PausedRecord";
-        case UPnPClient::AVTransport::Recording: return "Recording";
-        case UPnPClient::AVTransport::NoMediaPresent: return "No Media";
+        case UPnPClient::AVTransport::Unknown:
+            return "Unknown";
+        case UPnPClient::AVTransport::Stopped:
+            return "Stopped";
+        case UPnPClient::AVTransport::Playing:
+            return "Playing";
+        case UPnPClient::AVTransport::Transitioning:
+            return "Transitionning";
+        case UPnPClient::AVTransport::PausedPlayback:
+            return "PausedPlay";
+        case UPnPClient::AVTransport::PausedRecording:
+            return "PausedRecord";
+        case UPnPClient::AVTransport::Recording:
+            return "Recording";
+        case UPnPClient::AVTransport::NoMediaPresent:
+            return "No Media";
         }
     }
 
-    virtual void changed(const char *nm, int value)
-    {
+    virtual void changed(const char *nm, int value) {
         if (!strcmp(nm, "CurrentTrackDuration")) {
             // This is normally part of LastChange? but some renderers
             // apparently don't send it (bubble?). So use the value
@@ -81,10 +96,13 @@ public:
             m_cursecs = value;
         } else if (!strcmp(nm, "TransportState")) {
             //qDebug() << "AVT: Changed: " << nm << " " << tpstatetostr(value);
+            m_tpstate = AVTransport::TransportState(value);
             emit tpStateChanged(value);
-            if (value == UPnPClient::AVTransport::Stopped && m_in_ending) {
+            if (m_in_ending &&
+                (value == UPnPClient::AVTransport::Stopped ||
+                 value == UPnPClient::AVTransport::NoMediaPresent)) {
                 m_in_ending = false;
-                // qDebug() << "AVT: stoppedAtEOT";
+                qDebug() << "AVT EVT: emitting stoppedAtEOT";
                 emit stoppedAtEOT();
             }
         } else if (!strcmp(nm, "CurrentTransportActions")) {
@@ -109,7 +127,10 @@ public:
     virtual void changed(const char *nm, const char *value) {
         //qDebug() << "AVT: Changed: " << nm << " (char*): " << value;
         if (!strcmp(nm, "AVTransportURI")) {
-            if (m_cururi.compare(value)) {
+            if (m_cururi.compare(value) &&
+                    (m_tpstate == UPnPClient::AVTransport::Playing ||
+                     m_tpstate == UPnPClient::AVTransport::Transitioning ||
+                     m_tpstate == UPnPClient::AVTransport::PausedPlayback)) {
                 //qDebug() << "AVT: ext track change: cur [" << m_cururi.c_str()
                 //         << "] new [" << value << "]";
                 setcururi(value);
@@ -120,11 +141,19 @@ public:
 
     virtual void changed(const char *nm, UPnPClient::UPnPDirObject meta) {
         if (!strcmp(nm, "AVTransportURIMetaData")) {
-            qDebug() << "AVT: Changed: " << nm << " (dirc): " << 
-                meta.dump().c_str();
-            // Don't use this if no resources are set. XBMC does this
-            // for some reason.
-            if (!meta.m_resources.empty()) {
+            qDebug() << "AVT: Changed: " << nm << " (dirc): " <<
+                     meta.dump().c_str();
+            // Don't use this if no resources are set. XBMC/Kodi does
+            // this for some reason. Else we'd end-up with
+            // resource-less unplayable entries in the
+            // playlist. Scheduling a state update is not useful
+            // either because the data will have the same
+            // problem. Kodi only emits useful metadata when
+            // explicitely told to switch tracks (not even at regular
+            // track changes).
+            if (!meta.m_resources.empty() &&
+                    (m_tpstate == UPnPClient::AVTransport::Playing ||
+                     m_tpstate == UPnPClient::AVTransport::PausedPlayback)) {
                 emit currentMetadata(meta);
             }
         }
@@ -152,22 +181,24 @@ public slots:
         // setcururi(uri);
     }
 
-    virtual void prepareNextTrack(const std::string& uri,const AVTMetadata* md){
+    virtual void prepareNextTrack(const std::string& uri,
+                                  const AVTMetadata* md) {
         qDebug() << "AVT:prepareNextTrack: " << uri.c_str();
         m_srv->setNextAVTransportURI(uri, md->getDidl());
     }
 
-    // Seek to point. Parameter in percent.
-    virtual void seekPC(int pc) {
-        qDebug() << "AVT: seekPC " << pc << " %" << " m_cursecs " << m_cursecs;
-        if (m_cursecs > 0) {
-            m_srv->seek(UPnPClient::AVTransport::SEEK_REL_TIME, 
-                        (float(pc)/100.0) * m_cursecs); 
-        }
+    // Seek to point. Parameter in seconds
+    virtual void seek(int secs) {
+        qDebug() << "AVT: seek to " << secs << " S. m_cursecs " << m_cursecs;
+        m_srv->seek(UPnPClient::AVTransport::SEEK_REL_TIME, secs);
+    }
+
+    virtual void fetchState() {
+        update(true);
     }
 
     // Called by timer every sec
-    virtual void update() {
+    virtual void update(bool force = false) {
         UPnPClient::AVTransport::PositionInfo info;
         int error;
         if ((error = m_srv->getPositionInfo(info)) != 0) {
@@ -178,49 +209,73 @@ public slots:
             return;
         }
         m_errcnt = 0;
-        //qDebug() << "AVT: update: posinfo: reltime " << info.reltime << 
-        //    " tdur " << info.trackduration << " meta " << 
-        //    info.trackmeta.dump().c_str();
-        emit secsInSongChanged(info.reltime);
         m_cursecs = info.trackduration;
-        if (m_cururi.compare(info.trackuri)) {
-            qDebug() << "AVT: update: ext track change: cur [" << 
-                m_cururi.c_str() << "] new [" <<                     
-                info.trackuri.c_str() << "]";
-            setcururi(info.trackuri);
-            emit newTrackPlaying(u8s2qs(info.trackuri));
-        }
-        if (m_cursecs > 0) {
-            if (info.reltime > m_cursecs - 10) {
-                if (!m_sent_end_of_track_sig) {
-                    qDebug() << "Emitting prepare for end";
-                    emit endOfTrackIsNear();
-                    m_sent_end_of_track_sig = true;
-                }
-                m_in_ending = true;
-            } else if (info.reltime > 0 && info.reltime < 5) {
-                // This is for the case where we are playing 2
-                // consecutive identical URIs: heuristic try to detect
-                // the change
-                if (m_in_ending == true) {
-                    qDebug() << "Was in end, seeing start: trackswitch";
-                    setcururi(info.trackuri);
-                    emit newTrackPlaying(u8s2qs(info.trackuri));
-                }
-            }
-        }
+
         UPnPClient::AVTransport::TransportInfo tinfo;
         if ((error = m_srv->getTransportInfo(tinfo)) != 0) {
             qDebug() << "getTransportInfo failed with error " << error;
             return;
         }
-        if (tinfo.tpstate != m_tpstate) {
+
+        //qDebug() << "AVT: update: posinfo: reltime " << info.reltime <<
+        //    " tdur " << info.trackduration << " meta " <<
+        //    info.trackmeta.dump().c_str();
+
+        if (m_tpstate == UPnPClient::AVTransport::Playing) {
+            // Time-related stuff
+            emit secsInSongChanged(info.reltime);
+            if (m_cursecs > 0) {
+                if (info.reltime > m_cursecs - 10) {
+                    if (!m_sent_end_of_track_sig) {
+                        qDebug() << "AVT: Emitting endOfTrackIsNear()";
+                        emit endOfTrackIsNear();
+                        m_sent_end_of_track_sig = true;
+                    }
+                    m_in_ending = true;
+                } else if (info.reltime > 0 && info.reltime < 5) {
+                    // This is for the case where we are playing 2
+                    // consecutive identical URIs: heuristic try to detect
+                    // the change
+                    if (m_in_ending == true) {
+                        qDebug() << "AVT: was in end, seeing start: trkswitch";
+                        setcururi(info.trackuri);
+                        emit newTrackPlaying(u8s2qs(info.trackuri));
+                    }
+                }
+            }
+        }
+        
+        if (force || tinfo.tpstate != m_tpstate) {
+            qDebug() << "AVT: emitting tpStateChanged:" <<
+                tpstatetostr(tinfo.tpstate);
             emit tpStateChanged(tinfo.tpstate);
             m_tpstate = tinfo.tpstate;
         }
-        if (tinfo.tpstate == UPnPClient::AVTransport::Stopped && m_in_ending) {
+        if (force || (m_cururi.compare(info.trackuri) &&
+                      (m_tpstate == UPnPClient::AVTransport::Playing ||
+                       m_tpstate == UPnPClient::AVTransport::Transitioning ||
+                       m_tpstate == UPnPClient::AVTransport::PausedPlayback))) {
+            qDebug() << "AVT: update: ext track change: cur [" <<
+                     m_cururi.c_str() << "] new [" <<
+                     info.trackuri.c_str() << "]";
+            setcururi(info.trackuri);
+            if (!info.trackmeta.m_resources.empty()) {
+                // Don't emit bogus meta which would unplayable
+                // entries in the playlist. The only moment when Kodi
+                // will emit usable metadata is when told to change
+                // tracks. MediaInfo returns the same data.
+                qDebug() << "AVT: emitting currentMetadata";
+                emit currentMetadata(info.trackmeta);
+            }
+            qDebug() << "AVT: emitting newTrackPlaying:" <<
+                u8s2qs(info.trackuri);
+            emit newTrackPlaying(u8s2qs(info.trackuri));
+        }
+        if (m_in_ending &&
+            (tinfo.tpstate == UPnPClient::AVTransport::Stopped ||
+             tinfo.tpstate == UPnPClient::AVTransport::NoMediaPresent)) {
             m_in_ending = false;
-            // qDebug() << "AVT: stoppedAtEOT";
+            qDebug() << "AVT: emitting stoppedAtEOT";
             emit stoppedAtEOT();
         }
     }

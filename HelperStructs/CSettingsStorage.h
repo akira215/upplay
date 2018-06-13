@@ -77,7 +77,6 @@ public:
     GENDEC_VARIABLE(PlaylistNumbers, bool, Bool);
     GENDEC_VARIABLE(NotifyNewVersion, bool,  Bool);
     GENDEC_VARIABLE(PlayerUID, QString, String);
-    GENDEC_VARIABLE(LoadPlaylist, bool, Bool);
     GENDEC_VARIABLE(SplitterState, QByteArray, ByteArray);
     enum SortKinds {SK_NOSORT=0, SK_MINIMFNORDER=1, SK_CUSTOM=2};
     GENDEC_VARIABLE(SortKind, int, Int);

@@ -70,7 +70,7 @@ public slots:
 
 signals:
     void volumeChanged(int);
-    void muteChanged(int);
+    void muteChanged(bool);
 
 private:
     UPnPClient::OHVLH m_srv;

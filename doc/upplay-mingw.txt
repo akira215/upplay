@@ -1,0 +1,64 @@
+= Building upplay with MinGW
+
+First install http://www.mingw.org/[MinGW] and 
+http://www.qt.io/download/[Qt 5.5].
+
+Also install http://www.jrsoftware.org/isinfo.php[innosetup], this will be
+used to create the installer.
+
+Start a command window running the Bash shell,
+using `C:\MinGW\msys\1.0\msys.bat`
+
+*Change the PATH* to use the tools wich come with Qt 5.5, not the ones from
+the MinGW install (which is mostly there to provide bash and tar
+actually...). 
+
+    export PATH=c:/qt/tools/mingw492_32/bin:$PATH
+
+== libupnp
+
+Clone it from https://github.com/medoc92/pupnp16, use the default branch
+pupnp16-fixes, and follow the instructions in README_MINGW.txt
+
+== curl 7.43.0
+
+Download http://curl.haxx.se/download/curl-7.45.0.tar.gz[curl]
+Extract it:
+
+    cd c:\temp
+    tar xf curl-7.45.0.tar.gz
+
+Have a look at curl-7.45.0/docs/INSTALL: MinGW32 section
+
+- *Do not* run configure, just "make mingw32"
+
+    cd curl-7.45.0
+    make mingw32
+    
+== expat
+
+Download
+http://sourceforge.net/projects/expat/files/latest/download?source=files[expat
+2.1.0]
+
+Extract 
+
+    cd expat-2.1.0
+    configure
+    make
+
+=== libupnpp
+
+Copy windows/config_windows.h to libupnpp/config.h
+
+Then use windows/qmk/libupnpp.pro, possibly adjusting paths 
+
+=== upplay
+
+Open upplay.pro with Qt Creator. Possibly adjust the paths to
+libupnp/curl/expat and libupnpp, build.
+
+Then use the windows/mkinstdir.sh to create an installation directory, and
+use the innosetup file windows/innosetup/upplay-setup.iss to create the
+installer.
+

@@ -1,5 +1,3 @@
-/* GUI_PlaylistEntry.h */
-
 /* Copyright (C) 2011  Lucio Carreras
  *
  * This file is part of sayonara player
@@ -17,15 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
-/*
- * GUI_PlaylistEntry.h
- *
- *  Created on: Apr 9, 2011
- *      Author: luke
- */
-
 #ifndef GUI_PLAYLISTENTRY_H_
 #define GUI_PLAYLISTENTRY_H_
 
@@ -35,20 +24,17 @@
 #include <QFrame>
 
 
-class GUI_PlaylistEntryBig : public GUI_PlaylistEntry, private Ui::PlaylistEntryBig {
-
-	Q_OBJECT
-public:
-	GUI_PlaylistEntryBig(QWidget* parent=0);
-	virtual ~GUI_PlaylistEntryBig();
+class GUI_PlaylistEntryBig : public GUI_PlaylistEntry {
+    Q_OBJECT
 
 public:
+    GUI_PlaylistEntryBig(QWidget* parent = 0);
+    virtual ~GUI_PlaylistEntryBig();
     virtual void setContent(const MetaData& md, int idx);
+    int fontheight();
 
 private:
     Ui::PlaylistEntryBig* ui;
-
-
 };
 
 #endif /* GUI_PLAYLISTENTRY_H_ */

@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #ifndef PLAYLISTVIEW_H_
 #define PLAYLISTVIEW_H_
 
@@ -27,11 +26,14 @@
 #include <QModelIndex>
 #include <QMouseEvent>
 #include <QListView>
+#include <QTimer>
 
 #include "HelperStructs/MetaData.h"
 #include "GUI/playlist/model/PlaylistItemModel.h"
 #include "GUI/playlist/delegate/PlaylistItemDelegate.h"
-#include "GUI/ContextMenu.h"
+#include "ContextMenu.h"
+
+class QTimer;
 
 class PlaylistView : public QListView {
 
@@ -49,6 +51,9 @@ signals:
     void sig_selection_min_row(int);
     void sig_double_clicked(int);
     void sig_no_focus();
+
+public slots:
+    void invert_selection();
 
 private slots:
     void forbid_mimedata_destroyable();
@@ -75,8 +80,6 @@ public:
     void set_current_track(int row);
     int get_num_rows();
     void show_big_items(bool);
-
-
 
 protected:
     // overloaded stuff
@@ -113,6 +116,9 @@ private:
 
 private:
     QWidget*        _parent;
+    // Timer active if the user did something recently: avoid moving the
+    // playlist around
+    QTimer*         m_usertimer;
 
     bool            _drag;
     bool            _drag_allowed;

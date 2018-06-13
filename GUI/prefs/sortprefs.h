@@ -20,20 +20,28 @@
 #include <vector>
 #include <string>
 
+#include "utils/confgui.h"
+
 #include "ui_sortprefs.h"
 
-class SortprefsDLG : public QDialog, public Ui::SortprefsDLG {
+class SortprefsW : public QWidget, public Ui::SortprefsW, 
+                   public confgui::ConfPanelWIF {
+
     Q_OBJECT
-    public:
-    SortprefsDLG(const std::vector<std::string>& crits, QWidget * parent = 0)
-	: QDialog(parent)
+
+public:
+
+    SortprefsW(QWidget *parent = 0)
+	: QWidget(parent)
     {
 	setupUi(this);
-
         critsLW->setDragDropMode(QAbstractItemView::InternalMove);
-        for (unsigned int i = 0; i < crits.size(); ++i)
-            critsLW->addItem(new QListWidgetItem(crits[i].c_str()));
     }
+
+public:
+
+    void loadValues();
+    void storeValues();
 };
 
 #endif /* _SORTPREFS_H_INCLUDED_ */

@@ -16,17 +16,37 @@
  */
 
 #include <iostream>
+#include <functional>
+#include <time.h>
+
 #include "libupnpp/config.h"
 
-using namespace std;
-
+#include <QUrl>
+#ifdef USING_WEBENGINE
+// Notes for WebEngine
+// - All links must begin with http:// for acceptNavigationRequest to be
+//   called. 
+// - The links passed to acceptNav.. have the host part 
+//   lowercased -> we change S0 to http://h/S0, not http://S0
+// As far as I can see, 2016-09, two relatively small issues remaining:
+//  - No way to know when page load is done (see mySetHtml())
+//  - No way to save/restore the scroll position, all the rest works ok.
+ 
+#include <QWebEnginePage>
+#include <QWebEngineSettings>
+#include <QLoggingCategory>
+#else
 #include <QWebFrame>
 #include <QWebSettings>
-#include <QUrl>
 #include <QWebElement>
+#include <QScriptEngine>
+#endif
+
+#include <QMessageBox>
 #include <QMenu>
 #include <QApplication>
-#include <QScriptEngine>
+#include <QByteArray>
+#include <QProgressDialog>
 
 #include "HelperStructs/Helper.h"
 #include "HelperStructs/CSettingsStorage.h"
@@ -41,38 +61,81 @@ using namespace std;
 #include "dirbrowser.h"
 #include "rreaper.h"
 
+
+using namespace std;
+using namespace std::placeholders;
 using namespace UPnPP;
 using namespace UPnPClient;
 
 static const string minimFoldersViewPrefix("0$folders");
 
-CDBrowser::CDBrowser(QWidget* parent)
-    : QWebView(parent), m_reader(0), m_reaper(0), m_browsers(0), 
-      m_lastbutton(Qt::LeftButton)
+static void msleep(int millis)
 {
+    struct timespec spec;
+    spec.tv_sec = millis / 1000;
+    spec.tv_nsec = (millis % 1000) * 1000000;
+    nanosleep(&spec, 0);
+}
+
+void CDWebPage::javaScriptConsoleMessage(
+#ifdef USING_WEBENGINE
+    JavaScriptConsoleMessageLevel,
+#endif
+    const QString& msg, int lineNum, const QString&)
+{
+    Q_UNUSED(msg);
+    Q_UNUSED(lineNum);
+    LOGDEB("JAVASCRIPT: "<< qs2utf8s(msg) << " at line " << lineNum << endl);
+}
+
+static const QString html_top_orig = QString::fromUtf8(
+    "<html><head>"
+    "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">"
+    );
+
+// The const part + the js we need for webengine
+static QString html_top_js;
+// The const part + the js + changeable style, computed as needed.
+static QString html_top;
+
+CDBrowser::CDBrowser(QWidget* parent)
+    : QWEBVIEW(parent), m_reader(0), m_reaper(0), m_progressD(0),
+      m_browsers(0), m_lastbutton(Qt::LeftButton), m_sysUpdId(0)
+{
+    setPage(new CDWebPage(this));
+    
+#ifdef USING_WEBENGINE
+    if (html_top_js.isEmpty()) {
+        QLoggingCategory("js").setEnabled(QtDebugMsg, true);
+        QString jsfn = Helper::getSharePath() + "/cdbrowser/containerscript.js";
+        QString js = "<script type=\"text/javascript\">\n";
+        js += QString::fromUtf8(Helper::readFileToByteArray(jsfn));
+        js += "</script>\n";
+        html_top_js = html_top + js;
+    }
+#else
+    html_top_js = html_top;
     connect(this, SIGNAL(linkClicked(const QUrl &)), 
-	    this, SLOT(onLinkClicked(const QUrl &)));
-
+            this, SLOT(onLinkClicked(const QUrl &)));
+    // Not available and not sure that this is needed with webengine ?
+    connect(page()->mainFrame(), SIGNAL(contentsSizeChanged(const QSize&)),
+            this, SLOT(onContentsSizeChanged(const QSize&)));
     page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+#endif
 
-    settings()->setAttribute(QWebSettings::JavascriptEnabled, true);
+    // This sets html_top
+    setStyleSheet(CSettingsStorage::getInstance()->getPlayerStyle(), false);
+    
+    settings()->setAttribute(QWEBSETTINGS::JavascriptEnabled, true);
     if (parent) {
-        settings()->setFontSize(QWebSettings::DefaultFontSize, 
+        settings()->setFontSize(QWEBSETTINGS::DefaultFontSize, 
                               parent->font().pointSize()+4);
-	settings()->setFontFamily(QWebSettings::StandardFont, 
+	settings()->setFontFamily(QWEBSETTINGS::StandardFont, 
 			       parent->font().family());
     }
-    setStyleSheet(CSettingsStorage::getInstance()->getPlayerStyle());
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
 	    this, SLOT(createPopupMenu(const QPoint&)));
-    connect(page()->mainFrame(), SIGNAL(contentsSizeChanged(const QSize&)),
-            this, SLOT(onContentsSizeChanged(const QSize&)));
-
-    setHtml("<html><head><title>Upplay directory browser !</title></head>"
-            "<body><p>Looking for servers...</p>"
-            "</body></html>");
-
     m_timer.setSingleShot(1);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(initialPage()));
     m_timer.start(0);
@@ -83,55 +146,100 @@ CDBrowser::~CDBrowser()
     deleteReaders();
 }
 
+void CDBrowser::mySetHtml(const QString& html)
+{
+    // Tried to wait using an event loop, but it seems that the
+    // loadFinished() signal is only ever triggered once, even if we
+    // replace with a new page ???
+
+    // QEventLoop pause;
+    // setPage(new CDWebPage(this));
+    // connect(page(), SIGNAL(loadFinished(bool)), &pause, SLOT(quit()));
+    setHtml(html);
+    msleep(100);
+    //pause.exec();
+}
+
 void CDBrowser::mouseReleaseEvent(QMouseEvent *event)
 {
     //qDebug() << "CDBrowser::mouseReleaseEvent";
     m_lastbutton = event->button();
-    QWebView::mouseReleaseEvent(event);
+    QWEBVIEW::mouseReleaseEvent(event);
 }
 
-void CDBrowser::setStyleSheet(bool dark)
+// Insert style from on-disk config data to our static constant
+// top-of-page. 
+void CDBrowser::setStyleSheet(bool dark, bool redisplay)
 {
     QString cssfn = Helper::getSharePath() + "/cdbrowser/cdbrowser.css";
-    QByteArray css = Helper::readFileToByteArray(cssfn);
+    QString cssdata = QString::fromUtf8(Helper::readFileToByteArray(cssfn));
 
     if (dark) {
         cssfn = Helper::getSharePath() + "/cdbrowser/dark.css";
-        css +=  Helper::readFileToByteArray(cssfn);
+        cssdata +=  Helper::readFileToByteArray(cssfn);
     } else {
         cssfn = Helper::getSharePath() + "/cdbrowser/standard.css";
     }
-    css +=  Helper::readFileToByteArray(cssfn);
+    cssdata +=  Helper::readFileToByteArray(cssfn);
 
-    css = QByteArray("data:text/css;charset=utf-8;base64,") +
-        css.toBase64();
-
-    QUrl cssurl(QString::fromUtf8((const char*)css));
-    settings()->setUserStyleSheetUrl(cssurl);
+    html_top = html_top_js;
+    html_top += "<style>\n";
+    html_top += cssdata;
+    html_top += "</style>\n";
+    if (redisplay) {
+        if (m_curpath.size()) {
+            curpathClicked(m_curpath.size() - 1);
+        } else {
+            initialPage(true);
+        }
+    }
 }
 
 void CDBrowser::onContentsSizeChanged(const QSize&)
 {
     //qDebug() << "CDBrowser::onContentsSizeChanged: scrollpos " <<
     // page()->mainFrame()->scrollPosition();
+#ifndef USING_WEBENGINE
+    // No way to do this with webengine ?
     page()->mainFrame()->setScrollPosition(m_savedscrollpos);
+#endif
 }
+
+#ifdef USING_WEBENGINE
+static QString base64_encode(QString string)
+{
+    QByteArray ba;
+    ba.append(string);
+    return ba.toBase64();
+}
+#endif
 
 void CDBrowser::appendHtml(const QString& elt_id, const QString& html)
 {
-    //qDebug() "CDBrowser::appendHtml: " << qs2utf8s(html);
-    
+    LOGDEB1("CDBrowser::appendHtml: elt_id [" << qs2utf8s(elt_id) <<
+           "] html "<< qs2utf8s(html) << endl);
+
+#ifdef USING_WEBENGINE
+    // With webengine, we can't access qt object from the page, so we
+    // do everything in js. The data is encoded as base64 to avoid
+    // quoting issues
+    QString js;
+    js = "var morehtml = '" + base64_encode(html) + "';\n";
+    if (elt_id.isEmpty()) {
+        js += QString("document.body.innerHTML += window.atob(morehtml);\n");
+    } else {
+        js += QString("document.getElementById(\"%1\").innerHTML += "
+                     "window.atob(morehtml);\n").arg(elt_id);
+    }
+    page()->runJavaScript(js, [] (QVariant res) {
+            Q_UNUSED(res);
+        });
+#else
     QWebFrame *mainframe = page()->mainFrame();
     StringObj morehtml(html);
 
     mainframe->addToJavaScriptWindowObject("morehtml", &morehtml, 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-                      QWebFrame::ScriptOwnership
-#else
-                      QScriptEngine::ScriptOwnership
-#endif
-);
-
+                                           SCRIPTOWNERSHIP);
     QString js;
     if (elt_id.isEmpty()) {
         js = QString("document.body.innerHTML += morehtml.text");
@@ -140,14 +248,98 @@ void CDBrowser::appendHtml(const QString& elt_id, const QString& html)
                      "morehtml.text").arg(elt_id);
     }
     mainframe->evaluateJavaScript(js);
+#endif
+}
+
+bool CDBrowser::newCds(int cdsidx)
+{
+    if (cdsidx > int(m_msdescs.size())) {
+        LOGERR("CDBrowser::newCds: bad link index: " << cdsidx 
+               << " cd count: " << m_msdescs.size() << endl);
+        return false;
+    }
+    MSRH ms = MSRH(new MediaServer(m_msdescs[cdsidx]));
+    if (!ms) {
+        qDebug() << "MediaServer connect failed";
+        return false;
+    }
+    CDSH cds = ms->cds();
+    if (!cds) {
+        LOGERR("CDBrowser::newCds: null cds" << endl);
+        return false;
+    }
+    m_cds = std::shared_ptr<ContentDirectoryQO>(new ContentDirectoryQO(cds));
+    m_sysUpdId = 0;
+    connect(m_cds.get(), SIGNAL(systemUpdateIDChanged(int)),
+            this, SLOT(onSysUpdIdChanged(int)));
+    return true;
+}
+
+void CDBrowser::onSysUpdIdChanged(int id)
+{
+    qDebug() << "CDBrowser::onSysUpdIdChanged: mine " << m_sysUpdId <<
+        "server" << id;
+
+    if (!QSettings().value("monitorupdateid").toBool()) {
+        return;
+
+    }
+    // 1st time is free
+    if (!m_sysUpdId) {
+        m_sysUpdId = id;
+        return;
+    }
+
+    // We should try to use the containerUpdateIDs to make sure of
+    // what needs to be done, instead of dumping the problem on the
+    // user.
+    if (m_sysUpdId != id) {
+
+        m_sysUpdId = id;
+
+        // CDSKIND_BUBBLE, CDSKIND_MEDIATOMB,
+        // CDSKIND_MINIDLNA, CDSKIND_MINIM, CDSKIND_TWONKY
+        ContentDirectory::ServiceKind kind = m_cds->srv()->getKind();
+        switch (kind) {
+            // Not too sure which actually invalidate their
+            // tree. Pretty sure that Minim does not (we might just
+            // want to reload the current dir).
+        case ContentDirectory::CDSKIND_MINIDLNA: break;
+        case ContentDirectory::CDSKIND_MEDIATOMB: break;
+            // By default, don't do anything by default because some
+            // cds keep changing their global updateid. We'd need to
+            // check the containerUpdateID.
+        case ContentDirectory::CDSKIND_MINIM:
+        default: return;
+        }
+
+        QMessageBox::Button rep = 
+            QMessageBox::question(0, "Upplay",
+                                  tr("Content Directory Server state changed, "
+                                     "some references may be invalid. (some "
+                                     "playlist elements may be invalid too). "
+                                     "<br>Reset browse state ?"),
+                                  QMessageBox::Ok | QMessageBox::Cancel);
+        if (rep == QMessageBox::Ok) {
+            curpathClicked(1);
+            m_sysUpdId = 0;
+        }
+    }
 }
 
 void CDBrowser::onLinkClicked(const QUrl &url)
 {
     m_timer.stop();
     string scurl = qs2utf8s(url.toString());
-    //qDebug() << "CDBrowser::onLinkClicked: " << scurl << " button " << 
-    //m_lastbutton << " mid " << Qt::MidButton;
+    qDebug() << "CDBrowser::onLinkClicked: " << url.toString() << 
+        " button " <<  m_lastbutton << " mid " << Qt::MidButton;
+    // Get rid of http://
+    if (scurl.find("http://h/") != 0) {
+        qDebug() << "CDBrowser::onLinkClicked: bad link ! : " << url.toString();
+        return;
+    }
+    scurl = scurl.substr(9);
+    LOGDEB("CDBrowser::onLinkClicked: corrected url: [" << scurl << "]" <<endl);
 
     int what = scurl[0];
 
@@ -157,23 +349,14 @@ void CDBrowser::onLinkClicked(const QUrl &url)
     {
         // Servers page server link click: browse clicked server root
 	unsigned int cdsidx = atoi(scurl.c_str()+1);
-        if (cdsidx > m_msdescs.size()) {
-	    LOGERR("CDBrowser::onLinkClicked: bad link index: " << cdsidx 
-                   << " cd count: " << m_msdescs.size() << endl);
-	    return;
-	}
         m_curpath.clear();
         m_curpath.push_back(CtPathElt("0", "(servers)"));
-        m_ms = MSRH(new MediaServer(m_msdescs[cdsidx]));
-        if (!m_ms) {
-            qDebug() << "MediaServer connect failed";
+        if (!newCds(cdsidx)) {
             return;
         }
-        CDSH cds = m_ms->cds();
-        if (cds) {
-            cds->getSearchCapabilities(m_searchcaps);
-            emit sig_searchcaps_changed();
-        }
+        m_cds->srv()->getSearchCapabilities(m_searchcaps);
+        emit sig_searchcaps_changed();
+
 	browseContainer("0", m_msdescs[cdsidx].friendlyName);
     }
     break;
@@ -197,7 +380,11 @@ void CDBrowser::onLinkClicked(const QUrl &url)
     case 'C':
     {
         // Directory listing container link clicked: browse subdir.
+#ifdef USING_WEBENGINE
+#warning tobedone
+#else
         m_curpath.back().scrollpos = page()->mainFrame()->scrollPosition();
+#endif
 	unsigned int i = atoi(scurl.c_str()+1);
         if (i > m_entries.size()) {
 	    LOGERR("CDBrowser::onLinkClicked: bad objid index: " << i 
@@ -208,7 +395,8 @@ void CDBrowser::onLinkClicked(const QUrl &url)
             // Open in new tab
             vector<CtPathElt> npath(m_curpath);
             npath.push_back(CtPathElt(m_entries[i].m_id, m_entries[i].m_title));
-            emit sig_browse_in_new_tab(u8s2qs(m_ms->desc()->UDN), npath);
+            emit sig_browse_in_new_tab(u8s2qs(m_cds->srv()->getDeviceId()),
+                                       npath);
         } else {
             browseContainer(m_entries[i].m_id, m_entries[i].m_title);
         }
@@ -244,7 +432,7 @@ void CDBrowser::curpathClicked(unsigned int i)
     if (i == 0) {
         m_curpath.clear();
         m_msdescs.clear();
-        m_ms = MSRH();
+        m_cds.reset();
         initialPage();
     } else {
         string objid = m_curpath[i].objid;
@@ -255,7 +443,8 @@ void CDBrowser::curpathClicked(unsigned int i)
         if (m_lastbutton == Qt::MidButton) {
             vector<CtPathElt> npath(m_curpath);
             npath.push_back(CtPathElt(objid, title, ss));
-            emit sig_browse_in_new_tab(u8s2qs(m_ms->desc()->UDN), npath);
+            emit sig_browse_in_new_tab(u8s2qs(m_cds->srv()->getDeviceId()),
+                                       npath);
         } else {
             if (ss.empty()) {
                 browseContainer(objid, title, scrollpos);
@@ -287,7 +476,7 @@ void CDBrowser::browseIn(QString UDN, vector<CtPathElt> path)
     string sudn = qs2utf8s(UDN);
     for (unsigned int i = 0; i < m_msdescs.size(); i++) {
         if (m_msdescs[i].UDN == sudn) {
-            m_ms = MSRH(new MediaServer(m_msdescs[i]));
+            newCds(i);
             curpathClicked(path.size() - 1);
             return;
         }
@@ -295,15 +484,29 @@ void CDBrowser::browseIn(QString UDN, vector<CtPathElt> path)
     qDebug() << "CDBrowser::browsein: " << UDN << " not found";
 }
 
-static const QString init_container_page(
-    "<html><head>"
-    "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">"
-    "</head><body>"
+static const QString init_container_pagemid = QString::fromUtf8(
+#ifdef USING_WEBENGINE
+    "</head><body onload=\"addEventListener('contextmenu', saveLoc)\">\n"
+#else
+    "</head><body>\n"
+#endif
+    );
+static const QString init_container_pagebot = QString::fromUtf8(
+    "<table id=\"entrylist\">"
+    "<colgroup>"
+    "<col class=\"coltracknumber\">"
+    "<col class=\"coltitle\">"
+    "<col class=\"colartist\">"
+    "<col class=\"colalbum\">"
+    "<col class=\"colduration\">"
+    "</colgroup>"
+    "</table>"
     "</body></html>"
     );
 
 void CDBrowser::initContainerHtml(const string& ss)
 {
+    LOGDEB1("CDBrowser::initContainerHtml\n");
     QString htmlpath("<div id=\"browsepath\"><ul>");
     bool current_is_search = false;
     for (unsigned i = 0; i < m_curpath.size(); i++) {
@@ -321,7 +524,7 @@ void CDBrowser::initContainerHtml(const string& ss)
         if (i == 0)
             sep = "";
         htmlpath += QString("<li class=\"container\" objid=\"%3\">"
-                            " %4 <a href=\"L%1\">%2</a></li>").
+                            " %4 <a href=\"http://h/L%1\">%2</a></li>").
             arg(i).arg(title).arg(objid).arg(sep);
     }
     htmlpath += QString("</ul></div><br clear=\"all\"/>");
@@ -329,9 +532,11 @@ void CDBrowser::initContainerHtml(const string& ss)
         htmlpath += QString("Search results for: ") + 
             QString::fromUtf8(ss.c_str()) + "<br/>";
     }
-    setHtml(init_container_page);
-    appendHtml(QString(), htmlpath);
-    appendHtml(QString(), "<table id=\"entrylist\"></table>");
+    QString html = html_top + init_container_pagemid +
+        htmlpath + init_container_pagebot;
+    LOGDEB1("initContainerHtml: initial content: " << qs2utf8s(html) << endl);
+    mySetHtml(html);
+    LOGDEB1("CDBrowser::initContainerHtml done\n");
 }
 
 // Re-browse (because sort criteria changed probably)
@@ -344,19 +549,14 @@ void CDBrowser::refresh()
 
 void CDBrowser::browseContainer(string ctid, string cttitle, QPoint scrollpos)
 {
-    qDebug() << "CDBrowser::browseContainer: " << " ctid " << ctid.c_str();
+    LOGDEB("CDBrowser::browseContainer: " << " ctid " << ctid << endl);
     deleteReaders();
 
     emit sig_now_in(this, QString::fromUtf8(cttitle.c_str()));
 
     m_savedscrollpos = scrollpos;
-    if (!m_ms) {
+    if (!m_cds) {
         LOGERR("CDBrowser::browseContainer: server not set" << endl);
-        return;
-    }
-    CDSH cds = m_ms->cds();
-    if (!cds) {
-        LOGERR("Cant reach content directory service" << endl);
         return;
     }
     m_entries.clear();
@@ -365,7 +565,7 @@ void CDBrowser::browseContainer(string ctid, string cttitle, QPoint scrollpos)
 
     initContainerHtml();
     
-    m_reader = new ContentDirectoryQO(cds, ctid, string(), this);
+    m_reader = new CDBrowseQO(m_cds->srv(), ctid, string(), this);
 
     connect(m_reader, SIGNAL(sliceAvailable(UPnPClient::UPnPDirContent*)),
             this, SLOT(onSliceAvailable(UPnPClient::UPnPDirContent *)));
@@ -383,13 +583,8 @@ void CDBrowser::search(const string& objid, const string& iss, QPoint scrollpos)
     deleteReaders();
     if (iss.empty())
         return;
-    if (!m_ms) {
+    if (!m_cds) {
         LOGERR("CDBrowser::search: server not set" << endl);
-        return;
-    }
-    CDSH cds = m_ms->cds();
-    if (!cds) {
-        LOGERR("Cant reach content directory service" << endl);
         return;
     }
     m_savedscrollpos = scrollpos;
@@ -397,7 +592,7 @@ void CDBrowser::search(const string& objid, const string& iss, QPoint scrollpos)
     m_curpath.push_back(CtPathElt(objid, "(search)", iss));
     initContainerHtml(iss);
 
-    m_reader = new ContentDirectoryQO(cds, m_curpath.back().objid, iss, this);
+    m_reader = new CDBrowseQO(m_cds->srv(), m_curpath.back().objid, iss, this);
 
     connect(m_reader, SIGNAL(sliceAvailable(UPnPClient::UPnPDirContent*)),
             this, SLOT(onSliceAvailable(UPnPClient::UPnPDirContent *)));
@@ -409,34 +604,33 @@ void CDBrowser::search(const string& objid, const string& iss, QPoint scrollpos)
 static QString CTToHtml(unsigned int idx, const UPnPDirObject& e)
 {
     QString out;
-    out += QString("<tr class=\"container\" objid=\"%1\" objidx=\"%2\"><td></td><td>").
-        arg(e.m_id.c_str());
-    out += QString("<a class=\"ct_title\" href=\"C%1\">").arg(idx);
-    out += QString::fromUtf8(e.m_title.c_str());
-    out += QString("</a></td></tr>");
-    return out;
-}
-
-// Escape things that would look like HTML markup
-static string escapeHtml(const string &in)
-{
-    string out;
-    for (string::size_type pos = 0; pos < in.length(); pos++) {
-	switch(in.at(pos)) {
-	case '<': out += "&lt;"; break;
-	case '>': out += "&gt;"; break;
-	case '&': out += "&amp;"; break;
-	case '"': out += "&quot;"; break;
-	default: out += in.at(pos); break;
-	}
+    out += QString("<tr class=\"container\" objid=\"%1\" objidx=\"\">"
+                   "<td></td><td>").arg(e.m_id.c_str());
+    out += QString("<a class=\"ct_title\" href=\"http://h/C%1\">").arg(idx);
+    out += QString::fromUtf8(Helper::escapeHtml(e.m_title).c_str());
+    out += "</a></td>";
+    string val;
+    e.getprop("upnp:artist", val);
+    QSettings settings;
+    if (!val.empty() && settings.value("showartwithalb").toBool()) {
+        int maxlen = settings.value("artwithalblen").toInt();
+        if (maxlen && int(val.size()) > maxlen) {
+            int len = maxlen-3 >= 0 ? maxlen-3 : 0;
+            val = val.substr(0,len) + "...";
+        }
+        out += "<td class=\"ct_artist\">";
+        out += QString::fromUtf8(Helper::escapeHtml(val).c_str());
+        out += "</td>";
     }
+    out += "</tr>";
     return out;
 }
 
 /** @arg idx index in entries array
     @arg e array entry
 */
-static QString ItemToHtml(unsigned int idx, const UPnPDirObject& e)
+static QString ItemToHtml(unsigned int idx, const UPnPDirObject& e,
+                          int maxartlen)
 {
     QString out;
     string val;
@@ -445,24 +639,42 @@ static QString ItemToHtml(unsigned int idx, const UPnPDirObject& e)
         arg(e.m_id.c_str()).arg(idx);
 
     e.getprop("upnp:originalTrackNumber", val);
-    out += QString("<td class=\"tk_tracknum\">") + escapeHtml(val).c_str() + "</td>";
+    out += QString("<td class=\"tk_tracknum\">");
+    if (val.size() == 0) {
+        out += "&nbsp;";
+    } else {
+        out += QString::fromUtf8(Helper::escapeHtml(val).c_str());
+    }
+    out += "</td>";
 
     out += "<td class=\"tk_title\">";
-    out += QString("<a href=\"I%1\">").arg(idx);
-    out += QString::fromUtf8(escapeHtml(e.m_title).c_str());
-    out += "</a>";
+    if (e.m_title.size() == 0) {
+        out += "&nbsp;";
+    } else {
+        out += QString("<a href=\"http://h/I%1\">").arg(idx);
+        out += QString::fromUtf8(Helper::escapeHtml(e.m_title).c_str());
+        out += "</a>";
+    }
     out += "</td>";
 
     val.clear();
     e.getprop("upnp:artist", val);
     out += "<td class=\"tk_artist\">";
-    out += QString::fromUtf8(escapeHtml(val).c_str());
+    if (maxartlen > 0 && int(val.size()) > maxartlen) {
+        int len = maxartlen-3 >= 0 ? maxartlen-3 : 0;
+        val = val.substr(0,len) + "...";
+    }
+    if (val.size() == 0) {
+        out += "&nbsp;";
+    } else {
+        out += QString::fromUtf8(Helper::escapeHtml(val).c_str());
+    }
     out += "</td>";
     
     val.clear();
     e.getprop("upnp:album", val);
     out += "<td class=\"tk_album\">";
-    out += QString::fromUtf8(escapeHtml(val).c_str());
+    out += QString::fromUtf8(Helper::escapeHtml(val).c_str());
     out += "</td>";
     
     val.clear();
@@ -497,6 +709,11 @@ void CDBrowser::deleteReaders()
         delete m_reaper;
         m_reaper = 0;
     }
+    // Give a chance to queued signals (a thread could have queued
+    // something before/while we're cancelling it). Else, typically
+    // onSliceAvailable could be called at a later time and mess the
+    // display.
+    qApp->processEvents();
 }
 
 void CDBrowser::onSliceAvailable(UPnPDirContent *dc)
@@ -514,18 +731,36 @@ void CDBrowser::onSliceAvailable(UPnPDirContent *dc)
                       dc->m_items.size());
     for (std::vector<UPnPDirObject>::iterator it = dc->m_containers.begin();
          it != dc->m_containers.end(); it++) {
-        //qDebug() << "Container: " << entry.dump().c_str();;
+        //qDebug() << "Container: " << it->dump().c_str();;
         m_entries.push_back(*it);
         html += CTToHtml(m_entries.size()-1, *it);
     }
+    QSettings settings;
+    int maxartlen = 0;
+    if (settings.value("truncateartistindir").toBool()) {
+        maxartlen = settings.value("truncateartistlen").toInt();
+    }
+
     for (std::vector<UPnPDirObject>::iterator it = dc->m_items.begin();
          it != dc->m_items.end(); it++) {
-        //qDebug() << "Item: " << entry.dump().c_str();;
+        //qDebug() << "Item: " << it->dump().c_str();;
         m_entries.push_back(*it);
-        html += ItemToHtml(m_entries.size()-1, *it);
+        html += ItemToHtml(m_entries.size()-1, *it, maxartlen);
     }
     appendHtml("entrylist", html);
     delete dc;
+    // On very big lists (thousands), this can be quite late against
+    // the dir reading threads, with a long queue of slice events
+    // accumulated. The UI is frozen while we get called for each
+    // event in the queue. We'd like to give a chance to user
+    // interaction (e.g. scrolling)here, but it seems that there is no
+    // way to process only the user events, so processEvents does not help.
+    // Probably the only workable approach would be to do the
+    // appending from another thread?
+    // (by the way, processEvent if it worked must be called at the
+    // bottom of the func else we risk onBrowseDone getting called and
+    // deleting the reader before we can use it).
+    //qApp->processEvents();
 }
 
 class DirObjCmp {
@@ -562,6 +797,10 @@ public:
             sprintf(num, "%010d", i);
             storage = num;
             return storage;
+        } else if (!nm.compare("upplay:ctpath")) {
+            //qDebug() << "TTPATH: " <<
+            //    RecursiveReaper::ttpathPrintable(prop).c_str();
+            return prop;
         } else {
             return prop;
         }
@@ -600,27 +839,34 @@ void CDBrowser::onBrowseDone(int)
         sort(m_entries.begin(), m_entries.end(), cmpo);
         initContainerHtml();
         QString html;
+        int maxartlen = 0;
+        QSettings settings;
+        if (settings.value("truncateartistindir").toBool()) {
+            maxartlen = settings.value("truncateartistlen").toInt();
+        }
         for (unsigned i = 0; i < m_entries.size(); i++) {
             if (m_entries[i].m_type == UPnPDirObject::container) {
                 html += CTToHtml(i, m_entries[i]);
             } else {
-                html += ItemToHtml(i, m_entries[i]);
+                html += ItemToHtml(i, m_entries[i], maxartlen);
             }
         }
         appendHtml("entrylist", html);
     }
 
     m_reader->wait();
+#ifdef USING_WEBENGINE
+#warning tobedone
+#else
     page()->mainFrame()->setScrollPosition(m_savedscrollpos);
+#endif
     deleteReaders();
 
     //qDebug() << "CDBrowser::onBrowseDone done";
 }
 
 
-static const string init_server_page(
-    "<html><head>"
-    "<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">"
+static const QString init_server_page_bot = QString::fromUtf8(
     "</head><body>"
     "<h2 id=\"cdstitle\">Content Directory Services</h2>"
     "</body></html>"
@@ -630,13 +876,13 @@ static QString DSToHtml(unsigned int idx, const UPnPDeviceDesc& dev)
 {
     QString out;
     out += QString("<p class=\"cdserver\" cdsid=\"%1\">").arg(idx);
-    out += QString("<a href=\"S%1\">").arg(idx);
+    out += QString("<a href=\"http://h/S%1\">").arg(idx);
     out += QString::fromUtf8(dev.friendlyName.c_str());
     out += QString("</a></p>");
     return out;
 }
 
-void CDBrowser::initialPage()
+void CDBrowser::initialPage(bool redisplay)
 {
     deleteReaders();
     emit sig_now_in(this, tr("Servers"));
@@ -644,6 +890,9 @@ void CDBrowser::initialPage()
     vector<UPnPDeviceDesc> msdescs;
     int secs = UPnPDeviceDirectory::getTheDir()->getRemainingDelay();
     if (secs > 1) {
+        mySetHtml(html_top + init_server_page_bot);
+        appendHtml("", QString::fromUtf8("</head><body><p>Looking for "
+                                         "servers...</p></body></html>"));
         qDebug() << "CDBrowser::initialPage: waiting " << secs;
         m_timer.start(secs * 1000);
         return;
@@ -665,12 +914,10 @@ void CDBrowser::initialPage()
             }
         }
     }
-    if (same) {
+    if (same && !redisplay) {
         //LOGDEB("CDBrowser::initialPage: no change" << endl);
         m_timer.start(5000);
         return;
-    } else {
-        //qDebug() << "CDBrowser::initialPage: updating";
     }
 
     m_msdescs = msdescs;
@@ -682,7 +929,8 @@ void CDBrowser::initialPage()
         browseIn(s, m_curpath);
     } else {
         // Show servers list
-        setHtml(QString::fromUtf8(init_server_page.c_str()));
+        QString html = html_top + init_server_page_bot;
+        mySetHtml(html);
         for (unsigned i = 0; i < msdescs.size(); i++) {
             appendHtml("", DSToHtml(i, msdescs[i]));
         }
@@ -695,68 +943,123 @@ enum PopupMode {
     PUP_ADD_ALL,
     PUP_ADD_FROMHERE,
     PUP_BACK,
-    PUP_OPEN_IN_NEW_TAB
+    PUP_OPEN_IN_NEW_TAB,
+    PUP_RAND_PLAY_TRACKS,
+    PUP_RAND_PLAY_GROUPS,
+    PUP_RAND_STOP,
+    PUP_SORT_ORDER,
 };
+
+void CDBrowser::onLoadFinished(bool)
+{
+    LOGDEB("CDBrowser::onLoadFinished\n");
+}
+
+void CDBrowser::onPopupJsDone(const QVariant &jr)
+{
+    QString qs(jr.toString());
+    LOGDEB("onPopupJsDone: parameter: " << qs2utf8s(qs) << endl);
+    QStringList qsl = qs.split("\n", QString::SkipEmptyParts);
+    for (int i = 0 ; i < qsl.size(); i++) {
+        int eq = qsl[i].indexOf("=");
+        if (eq > 0) {
+            QString nm = qsl[i].left(eq).trimmed();
+            QString value = qsl[i].right(qsl[i].size() - (eq+1)).trimmed();
+            if (!nm.compare("objid")) {
+                m_popupobjid = qs2utf8s(value);
+            } else if (!nm.compare("title")) {
+                m_popupobjtitle = qs2utf8s(value);
+            } else if (!nm.compare("objidx")) {
+                m_popupidx = value.toInt();
+            } else if (!nm.compare("otype")) {
+                m_popupotype = qs2utf8s(value);
+            } else {
+                LOGERR("onPopupJsDone: unknown key: " << qs2utf8s(nm) << endl);
+            }
+        }
+    }
+    LOGDEB1("onPopupJsDone: class [" << m_popupotype <<
+           "] objid [" << m_popupobjid <<
+           "] title [" <<  m_popupobjtitle <<
+           "] objidx [" << m_popupidx << "]\n");
+    doCreatePopupMenu();
+}
 
 void CDBrowser::createPopupMenu(const QPoint& pos)
 {
-    if (!m_browsers || m_browsers->insertActive())
+    if (!m_browsers || m_browsers->insertActive()) {
+        LOGDEB("CDBrowser::createPopupMenu: no popup: insert active\n");
         return;
-    qDebug() << "void CDBrowser::createPopupMenu(const QPoint& pos)";
-
+    }
+    LOGDEB("CDBrowser::createPopupMenu\n");
+    m_popupobjid = m_popupobjtitle = m_popupotype = "";
+    m_popupidx = -1;
+    m_popupos = pos;
+    
+#ifdef USING_WEBENGINE
+    Q_UNUSED(pos);
+    QString js("window.locDetails;");
+    CDWebPage *mypage = dynamic_cast<CDWebPage*>(page());
+    QEventLoop pause;
+    connect(this, SIGNAL(sig_js_done()), &pause, SLOT(quit()));
+    mypage->runJavaScript(js, bind(&CDBrowser::onPopupJsDone, this, _1));
+#else
     QWebHitTestResult htr = page()->mainFrame()->hitTestContent(pos);
     if (htr.isNull()) {
+        qDebug() << "CDBrowser::createPopupMenu: no popup: no hit";
 	return;
     }
     QWebElement el = htr.enclosingBlockElement();
     while (!el.isNull() && !el.hasAttribute("objid"))
 	el = el.parent();
+    if (!el.isNull()) {
+        m_popupobjid = qs2utf8s(el.attribute("objid"));
+        m_popupobjtitle = qs2utf8s(el.toPlainText());
+        if (el.hasAttribute("objidx"))
+            m_popupidx = el.attribute("objidx").toInt();
+        else
+            m_popupidx = -1;
+        m_popupotype = qs2utf8s(el.attribute("class"));
+        LOGDEB("Popup: " << " class " << m_popupotype << " objid " << 
+               m_popupobjid << endl);
+    }
+    doCreatePopupMenu();
+#endif
+}
 
-    if (el.isNull()) {
-        // Click in blank space. We only have a Back action there for now
-        if (m_curpath.size() == 0)
-            return;
-        QMenu *popup = new QMenu(this);
-        QAction *act;
-        QVariant v;
+void CDBrowser::doCreatePopupMenu()
+{
+    QMenu *popup = new QMenu(this);
+    QAction *act;
+    QVariant v;
+    if (m_curpath.size() != 0) {
+        // Back action
         act = new QAction(tr("Back"), this);
         v = QVariant(int(PUP_BACK));
         act->setData(v);
         popup->addAction(act);
-        popup->connect(popup, SIGNAL(triggered(QAction *)), this, 
-                       SLOT(back(QAction *)));
-        popup->popup(mapToGlobal(pos));
-	return;
     }
 
-    // Clicked on some object. Dir entries inside the path have no objidx attr
-    // and that's ok
-    m_popupobjid = qs2utf8s(el.attribute("objid"));
-    m_popupobjtitle = qs2utf8s(el.toPlainText());
-    if (el.hasAttribute("objidx"))
-        m_popupidx = el.attribute("objidx").toInt();
-    else
-        m_popupidx = -1;
+    // Click in blank area, or no playlist the only entry is Back
+    if (m_popupobjid.empty() || (m_browsers && !m_browsers->have_playlist())) {
+        popup->connect(popup, SIGNAL(triggered(QAction *)),
+                       this, SLOT(back(QAction *)));
+        popup->popup(mapToGlobal(m_popupos));
+        return;
+    }
 
-    QString otype = el.attribute("class");
-    qDebug() << "Popup: " << " class " << otype << " objid " << 
-        m_popupobjid.c_str();
-
-    if (m_popupidx == -1 && otype.compare("container")) {
+    if (m_popupidx == -1 && m_popupotype.compare("container")) {
         // All path elements should be containers !
         qDebug() << "Not container and no objidx??";
         return;
     }
 
-    QMenu *popup = new QMenu(this);
-    QAction *act;
-    QVariant v;
     act = new QAction(tr("Send to playlist"), this);
     v = QVariant(int(PUP_ADD));
     act->setData(v);
     popup->addAction(act);
 
-    if (!otype.compare("item")) {
+    if (!m_popupotype.compare("item")) {
         act = new QAction(tr("Send all to playlist"), this);
         v = QVariant(int(PUP_ADD_ALL));
         act->setData(v);
@@ -767,24 +1070,50 @@ void CDBrowser::createPopupMenu(const QPoint& pos)
         act->setData(v);
         popup->addAction(act);
     }
-
-    if (!otype.compare("container")) {
+   
+    // Connect to either recursive add or simpleAdd depending on entry type.
+    if (!m_popupotype.compare("container")) {
         act = new QAction(tr("Open in new tab"), this);
         v = QVariant(int(PUP_OPEN_IN_NEW_TAB));
         act->setData(v);
         popup->addAction(act);
+
+        act = new QAction(tr("Random play by tracks"), this);
+        v = QVariant(int(PUP_RAND_PLAY_TRACKS));
+        act->setData(v);
+        popup->addAction(act);
+
+        act = new QAction(tr("Random play by groups"), this);
+        v = QVariant(int(PUP_RAND_PLAY_GROUPS));
+        act->setData(v);
+        popup->addAction(act);
+
         popup->connect(popup, SIGNAL(triggered(QAction *)), this, 
                        SLOT(recursiveAdd(QAction *)));
-    } else if (!otype.compare("item")) {
+    } else if (!m_popupotype.compare("item")) {
         popup->connect(popup, SIGNAL(triggered(QAction *)), this, 
                        SLOT(simpleAdd(QAction *)));
     } else {
         // ??
-        qDebug() << "CDBrowser::createPopup: obj type neither ct nor it: " <<
-            otype;
+        LOGDEB("CDBrowser::createPopup: obj type neither ct nor it: " <<
+               m_popupotype << endl);
         return;
     }
-    popup->popup(mapToGlobal(pos));
+
+    // Like BACK, RAND_STOP must be processed by both simple and
+    // recursiveAdd()
+    act = new QAction(tr("Stop random play"), this);
+    v = QVariant(int(PUP_RAND_STOP));
+    act->setData(v);
+    popup->addAction(act);
+    act->setEnabled(m_browsers->randPlayActive());
+
+    act = new QAction(tr("Sort order"), this);
+    v = QVariant(int(PUP_SORT_ORDER));
+    act->setData(v);
+    popup->addAction(act);
+
+    popup->popup(mapToGlobal(m_popupos));
 }
 
 void CDBrowser::back(QAction *)
@@ -793,12 +1122,34 @@ void CDBrowser::back(QAction *)
         curpathClicked(m_curpath.size() - 2);
 }
 
+bool CDBrowser::popupOther(QAction *act)
+{
+    m_popupmode = act->data().toInt();
+    switch (m_popupmode) {
+    case PUP_BACK:
+        back(0);
+        break;
+    case PUP_RAND_STOP:
+        emit sig_rand_stop();
+        break;
+    case PUP_SORT_ORDER:
+        emit sig_sort_order();
+        break;
+    default:
+        return false;
+    }
+    return true;
+}
+
 // Add a single track or a section of the current container. This
 // maybe triggered by a link click or a popup on an item entry
 void CDBrowser::simpleAdd(QAction *act)
 {
     //qDebug() << "CDBrowser::simpleAdd";
-    m_popupmode = act->data().toInt();
+    if (popupOther(act)) {
+        // Not for us
+        return;
+    }
     if (m_popupidx < 0 || m_popupidx > int(m_entries.size())) {
         LOGERR("CDBrowser::simpleAdd: bad obj index: " << m_popupidx
                << " id count: " << m_entries.size() << endl);
@@ -832,36 +1183,37 @@ void CDBrowser::simpleAdd(QAction *act)
 void CDBrowser::recursiveAdd(QAction *act)
 {
     //qDebug() << "CDBrowser::recursiveAdd";
-    m_popupmode = act->data().toInt();
 
     deleteReaders();
+
+    if (popupOther(act)) {
+        // Not for us
+        return;
+    }
+
+    if (!m_cds) {
+        qDebug() << "CDBrowser::recursiveAdd: server not set" ;
+        return;
+    }
 
     if (m_popupmode == PUP_OPEN_IN_NEW_TAB) {
         vector<CtPathElt> npath(m_curpath);
         npath.push_back(CtPathElt(m_popupobjid, m_popupobjtitle));
-        emit sig_browse_in_new_tab(u8s2qs(m_ms->desc()->UDN), npath);
-        return;
-    }
-
-    if (!m_ms) {
-        qDebug() << "CDBrowser::recursiveAdd: server not set" ;
-        return;
-    }
-    CDSH cds = m_ms->cds();
-    if (!cds) {
-        qDebug() << "Cant reach content directory service";
+        emit sig_browse_in_new_tab(u8s2qs(m_cds->srv()->getDeviceId()), npath);
         return;
     }
 
     if (m_browsers)
         m_browsers->setInsertActive(true);
-    ContentDirectory::ServiceKind kind = cds->getKind();
-    if (kind == ContentDirectory::CDSKIND_MINIM) {
+    ContentDirectory::ServiceKind kind = m_cds->srv()->getKind();
+    if (kind == ContentDirectory::CDSKIND_MINIM &&
+        m_popupmode != PUP_RAND_PLAY_GROUPS) {
         // Use search() rather than a tree walk for Minim, it is much
-        // more efficient.
+        // more efficient, except for rand play albums, where we want
+        // to preserve the paths (for discrimination)
         UPnPDirContent dirbuf;
         string ss("upnp:class = \"object.item.audioItem.musicTrack\"");
-        int err = cds->search(m_popupobjid, ss, dirbuf);
+        int err = m_cds->srv()->search(m_popupobjid, ss, dirbuf);
         if (err != 0) {
             LOGERR("CDBrowser::recursiveAdd: search failed, code " << err);
             return;
@@ -885,9 +1237,16 @@ void CDBrowser::recursiveAdd(QAction *act)
         rreaperDone(0);
 
     } else {
+        delete m_progressD;
+        m_progressD = new QProgressDialog("Exploring Directory          ",
+                                          tr("Cancel"), 0, 0, this);
+        // can't get setMinimumDuration to work
+        m_progressD->setMinimumDuration(2000);
+        time(&m_progstart);
+        
         m_recwalkentries.clear();
         m_recwalkdedup.clear();
-        m_reaper = new RecursiveReaper(cds, m_popupobjid, this);
+        m_reaper = new RecursiveReaper(m_cds->srv(), m_popupobjid, this);
         connect(m_reaper, 
                 SIGNAL(sliceAvailable(UPnPClient::UPnPDirContent *)),
                 this, 
@@ -915,7 +1274,7 @@ void CDBrowser::onReaperSliceAvailable(UPnPClient::UPnPDirContent *dc)
         //       dc->m_items[i].m_resources[0].m_uri << endl);
         string md5;
         MD5String(dc->m_items[i].m_resources[0].m_uri, md5);
-        pair<STD_UNORDERED_SET<std::string>::iterator, bool> res = 
+        pair<std::unordered_set<std::string>::iterator, bool> res = 
             m_recwalkdedup.insert(md5);
         if (res.second) {
             m_recwalkentries.push_back(dc->m_items[i]);
@@ -924,16 +1283,64 @@ void CDBrowser::onReaperSliceAvailable(UPnPClient::UPnPDirContent *dc)
         }
     }
     delete dc;
+    if (m_progressD) {
+        if (m_progressD->wasCanceled()) {
+            delete m_progressD;
+            m_progressD = 0;
+            m_reaper->setCancel();
+        } else {
+            if (time(0) - m_progstart >= 1) {
+                m_progressD->show();
+            }
+            m_progressD->setLabelText(
+                tr("Exploring Directory: %1 tracks").
+                arg(m_recwalkentries.size()));
+        }
+    }
 }
 
 void CDBrowser::rreaperDone(int status)
 {
-    LOGDEB("CDBrowser::rreaperDone: status: " << status << endl);
+    LOGDEB("CDBrowser::rreaperDone: status: " << status << ". Entries: " <<
+           m_recwalkentries.size() << endl);
     deleteReaders();
-    MetaDataList mdl;
-    mdl.resize(m_recwalkentries.size());
-    for (unsigned int i = 0; i <  m_recwalkentries.size(); i++) {
-        udirentToMetadata(&m_recwalkentries[i], &mdl[i]);
+    delete m_progressD;
+    m_progressD = 0;
+    if (m_popupmode == PUP_RAND_PLAY_TRACKS ||
+        m_popupmode == PUP_RAND_PLAY_GROUPS) {
+        if (m_browsers)
+            m_browsers->setInsertActive(false);
+        // Sort list
+        if (m_popupmode == PUP_RAND_PLAY_GROUPS) {
+            vector<string> sortcrits;
+            sortcrits.push_back("upplay:ctpath");
+            sortcrits.push_back("upnp:album");
+            sortcrits.push_back("upnp:originalTrackNumber");
+            DirObjCmp cmpo(sortcrits);
+            sort(m_recwalkentries.begin(), m_recwalkentries.end(), cmpo);
+        }
+        RandPlayer::PlayMode mode = m_popupmode == PUP_RAND_PLAY_TRACKS ?
+            RandPlayer::PM_TRACKS : RandPlayer::PM_GROUPS;
+        LOGDEB("CDBrowser::rreaperDone: emitting sig_tracks_to_randplay, mode "
+               << mode << endl);
+        emit sig_tracks_to_randplay(mode, m_recwalkentries);
+    } else {
+        int sortkind = CSettingsStorage::getInstance()->getSortKind();
+        if (sortkind == CSettingsStorage::SK_CUSTOM) {
+            QStringList qcrits =
+                CSettingsStorage::getInstance()->getSortCrits();
+            vector<string> sortcrits;
+            for (int i = 0; i < qcrits.size(); i++) {
+                sortcrits.push_back(qs2utf8s(qcrits[i]));
+            }
+            DirObjCmp cmpo(sortcrits);
+            sort(m_recwalkentries.begin(), m_recwalkentries.end(), cmpo);
+        }
+        MetaDataList mdl;
+        mdl.resize(m_recwalkentries.size());
+        for (unsigned int i = 0; i <  m_recwalkentries.size(); i++) {
+            udirentToMetadata(&m_recwalkentries[i], &mdl[i]);
+        }
+        emit sig_tracks_to_playlist(mdl);
     }
-    emit sig_tracks_to_playlist(mdl);
 }

@@ -67,7 +67,6 @@ GENCODE_VARIABLE(ShowSmallPlaylist, bool, Bool)
 GENCODE_VARIABLE(PlaylistNumbers, bool, Bool)
 GENCODE_VARIABLE(NotifyNewVersion, bool,  Bool)
 GENCODE_VARIABLE(PlayerUID, QString, String)
-GENCODE_VARIABLE(LoadPlaylist, bool, Bool)
 GENCODE_VARIABLE(SplitterState, QByteArray, ByteArray)
 GENCODE_VARIABLE(SortKind, int, Int);
 GENCODE_VARIABLE(SortCrits, QStringList, StringList);
@@ -82,12 +81,12 @@ bool CSettingsStorage::isRunFirstTime ()
 static const QString PlaylistModeKey("PlaylistMode");
 void CSettingsStorage::setPlaylistMode(const Playlist_Mode& mode)
 {
-    qDebug() << "setPlaylistMode: " << mode.toInt();
+    //qDebug() << "setPlaylistMode: " << mode.toInt();
     setValue(PlaylistModeKey, mode.toInt());
 }
 Playlist_Mode CSettingsStorage::getPlaylistMode()
 {
-    qDebug() << "getPlaylistMode: " << value(PlaylistModeKey).toInt();
+    //qDebug() << "getPlaylistMode: " << value(PlaylistModeKey).toInt();
     return Playlist_Mode(value(PlaylistModeKey).toInt());
 }
 

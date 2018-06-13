@@ -23,20 +23,21 @@
 #include "HelperStructs/Style.h"
 
 
-#define NEWLINE "\n";
-
 QString Style::get_style(bool dark)
 {
+    QString commonstyle;
+    Helper::read_file_into_str(Helper::getSharePath() + "/common.css", 
+                               &commonstyle);
     QString style;
-
     if (!dark) {
         Helper::read_file_into_str(Helper::getSharePath() + "/standard.css", 
                                    &style);
     } else {
-         Helper::read_file_into_str(Helper::getSharePath() + "/dark.css", &style);
+         Helper::read_file_into_str(Helper::getSharePath() + "/dark.css",
+                                    &style);
     }
 
-    return style;
+    return commonstyle + style;
 }
 
 

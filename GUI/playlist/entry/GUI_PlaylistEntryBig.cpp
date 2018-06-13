@@ -1,5 +1,3 @@
-/* GUI_PlaylistEntry.cpp */
-
 /* Copyright (C) 2011  Lucio Carreras
  *
  * This file is part of sayonara player
@@ -18,50 +16,47 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-/*
- * GUI_PlaylistEntry.cpp
- *
- *  Created on: Apr 9, 2011
- *      Author: luke
- */
-
 #include "GUI/playlist/entry/GUI_PlaylistEntryBig.h"
 #include "HelperStructs/CSettingsStorage.h"
 #include "HelperStructs/Helper.h"
 #include "HelperStructs/MetaData.h"
 
 
-GUI_PlaylistEntryBig::GUI_PlaylistEntryBig(QWidget* parent) : GUI_PlaylistEntry(parent){
+GUI_PlaylistEntryBig::GUI_PlaylistEntryBig(QWidget* parent)
+    : GUI_PlaylistEntry(parent)
+{
     this->ui = new Ui::PlaylistEntryBig();
-	this->ui->setupUi(this);
+    this->ui->setupUi(this);
 }
 
-GUI_PlaylistEntryBig::~GUI_PlaylistEntryBig() {
-	delete this->ui;
+GUI_PlaylistEntryBig::~GUI_PlaylistEntryBig()
+{
+    delete this->ui;
 }
 
+int GUI_PlaylistEntryBig::fontheight()
+{
+    return ui->pl_lab_title->fontMetrics().height();
+}
 
-void GUI_PlaylistEntryBig::setContent(const MetaData& md, int idx){
-
+void GUI_PlaylistEntryBig::setContent(const MetaData& md, int idx)
+{
     QString titlestr;
 
-    if(CSettingsStorage::getInstance()->getPlaylistNumbers())
+    if (CSettingsStorage::getInstance()->getPlaylistNumbers()) {
         titlestr = QString::number(idx) + ". " + md.title.trimmed();
-
-    else
+    } else {
         titlestr = md.title.trimmed();
-
-    this->ui->lab_title->setText(titlestr);
-    this->ui->lab_artist->setText(md.artist.trimmed());
-    this->ui->lab_time->setText(Helper::cvtMsecs2TitleLengthString(md.length_ms));
-    if(md.album == ""){
-        this->ui->lab_album->setText("");
-        return;
     }
 
-    this->ui->lab_album->setText(QString(" [ ") + Helper::get_album_w_disc(md) + " ]");
-
+    this->ui->pl_lab_title->setText(titlestr);
+    this->ui->pl_lab_artist->setText(md.artist.trimmed());
+    this->ui->pl_lab_time->setText(
+        Helper::cvtMsecs2TitleLengthString(md.length_ms));
+    if (md.album == "") {
+        this->ui->pl_lab_album->setText("");
+    } else {
+        this->ui->pl_lab_album->setText(
+            QString(" [ ") + Helper::get_album_w_disc(md) + " ]");
+    }
 }
-
-

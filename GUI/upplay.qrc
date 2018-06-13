@@ -1,52 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
-  <file>icons/addtab.png</file>
-  <file>icons/append.png</file>
-  <file>icons/arrow_down.png</file>
-  <file>icons/arrow_down_orange.png</file>
-  <file>icons/arrow_left.png</file>
-  <file>icons/arrow_left_orange.png</file>
-  <file>icons/arrow_right.png</file>
-  <file>icons/arrow_right_orange.png</file>
-  <file>icons/arrow_up.png</file>
-  <file>icons/arrow_up_orange.png</file>
-  <file>icons/broom.png</file>
-  <file>icons/bwd.png</file>
-  <file>icons/cb_checked.png</file>
-  <file>icons/cb_checked_disabled.png</file>
-  <file>icons/close.png</file>
   <file>icons/cross.png</file>
-  <file>icons/delete.png</file>
-  <file>icons/dynamic.png</file>
-  <file>icons/edit.png</file>
-  <file>icons/fwd.png</file>
-  <file>icons/fwd_orange.png</file>
-  <file>icons/id3.png</file>
-  <file>icons/import.png</file>
-  <file>icons/info_small.png</file>
-  <file>icons/logo.png</file>
-  <file>icons/numbers.png</file>
-  <file>icons/pause.png</file>
-  <file>icons/play.png</file>
-  <file>icons/rb_checked.png</file>
-  <file>icons/rb_checked_disabled.png</file>
-  <file>icons/rec.png</file>
-  <file>icons/rep1.png</file>
-  <file>icons/repAll.png</file>
-  <file>icons/scroll_hor_bg.png</file>
-  <file>icons/scroll_ver_bg.png</file>
-  <file>icons/shuffle.png</file>
-  <file>icons/slider_hor_bg.png</file>
-  <file>icons/slider_ver_bg.png</file>
-  <file>icons/stop.png</file>
-  <file>icons/vol_1.png</file>
-  <file>icons/vol_1_dark.png</file>
-  <file>icons/vol_2.png</file>
-  <file>icons/vol_2_dark.png</file>
-  <file>icons/vol_3.png</file>
-  <file>icons/vol_3_dark.png</file>
-  <file>icons/vol_mute.png</file>
-  <file>icons/vol_mute_dark.png</file>
 </qresource>
 </RCC>
 

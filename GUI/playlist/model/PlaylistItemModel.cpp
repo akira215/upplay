@@ -1,5 +1,3 @@
-/* PlaylistItemModel.cpp */
-
 /* Copyright (C) 2011  Lucio Carreras
  *
  * This file is part of sayonara player
@@ -18,14 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-/*
-* PlaylistItemModel.cpp
- *
- *  Created on: Apr 8, 2011
- *      Author: luke
- */
-
 #include "GUI/playlist/model/PlaylistItemModel.h"
 #include "HelperStructs/MetaData.h"
 
@@ -35,133 +25,142 @@
 
 using namespace std;
 
-PlaylistItemModel::PlaylistItemModel(QObject* parent) : QAbstractListModel(parent) {
+PlaylistItemModel::PlaylistItemModel(QObject* parent)
+    : QAbstractListModel(parent)
+{
 }
 
-PlaylistItemModel::~PlaylistItemModel() {
-	// TODO Auto-generated destructor stub
-}
-
-
-
-int PlaylistItemModel::rowCount(const QModelIndex &parent) const{
-	Q_UNUSED(parent);
-    return (int) (m_meta.size());
-}
-
-QVariant PlaylistItemModel::data(const QModelIndex &index, int role) const{
-
-	if (!index.isValid())
-		 return QVariant();
-
-    if (index.row() >= (int) m_meta.size() || index.row() < 0)
-		 return QVariant();
-
-	 if (role == Qt::DisplayRole){
-		return QVariant();
-	 }
-
-	 if (role == Qt::WhatsThisRole){
-         return m_meta[index.row()].toVariant();
-	 }
-
-	 else
-		 return QVariant();
+PlaylistItemModel::~PlaylistItemModel()
+{
 }
 
 
-
-
-Qt::ItemFlags PlaylistItemModel::flags(const QModelIndex &index = QModelIndex()) const{
-
-	if (!index.isValid())
-		return Qt::ItemIsEnabled;
-
-	return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+int PlaylistItemModel::rowCount(const QModelIndex& parent) const
+{
+    Q_UNUSED(parent);
+    return (int)(m_meta.size());
 }
 
-bool PlaylistItemModel::setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole){
+QVariant PlaylistItemModel::data(const QModelIndex& index, int role) const
+{
+    if (!index.isValid()) {
+        return QVariant();
+    }
 
-	 if (index.isValid() && role == Qt::EditRole) {
+    if (index.row() >= (int) m_meta.size() || index.row() < 0) {
+        return QVariant();
+    }
 
-         MetaData md;
-         if(MetaData::fromVariant(value, md)){
+    if (role == Qt::DisplayRole) {
+        return QVariant();
+    }
+
+    if (role == Qt::WhatsThisRole) {
+        return m_meta[index.row()].toVariant();
+    }
+
+    else {
+        return QVariant();
+    }
+}
+
+
+
+
+Qt::ItemFlags PlaylistItemModel::flags(const QModelIndex& index =
+                                       QModelIndex()) const
+{
+    if (!index.isValid()) {
+        return Qt::ItemIsEnabled;
+    }
+
+    return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+}
+
+bool PlaylistItemModel::setData(const QModelIndex& index, const QVariant& value,
+                                int role = Qt::EditRole)
+{
+    if (index.isValid() && role == Qt::EditRole) {
+        MetaData md;
+        if (MetaData::fromVariant(value, md)) {
             m_meta[index.row()] = md;
             emit dataChanged(index, index);
-         }
-	     return true;
-	 }
+        }
+        return true;
+    }
 
-	 return false;
+    return false;
 }
 
 
-bool PlaylistItemModel::insertRows(int position, int rows, const QModelIndex &index){
+bool PlaylistItemModel::insertRows(int position, int rows,
+                                   const QModelIndex& index)
+{
+    Q_UNUSED(index);
 
-	Q_UNUSED(index);
+    beginInsertRows(QModelIndex(), position, position + rows - 1);
 
+    MetaDataList v_md_new;
 
-	beginInsertRows(QModelIndex(), position, position+rows-1);
+    // copy old
+    for (int i = 0; i < position; i++) {
+        v_md_new.push_back(m_meta[i]);
+    }
 
-        MetaDataList v_md_new;
+    // create new space
+    for (int i = 0; i < rows; i++) {
+        MetaData md;
+        v_md_new.push_back(md);
+    }
 
-        // copy old
-        for(int i=0; i<position; i++){
-            v_md_new.push_back(m_meta[i]);
-        }
+    // copy old
+    for (uint i = (uint) position; i < m_meta.size(); i++) {
+        v_md_new.push_back(m_meta[i]);
+    }
 
-        // create new space
-        for(int i=0; i<rows; i++){
-            MetaData md;
-            v_md_new.push_back(md);
-        }
+    m_meta = v_md_new;
 
-        // copy old
-        for(uint i= (uint) position; i<m_meta.size(); i++){
-            v_md_new.push_back(m_meta[i]);
-        }
-
-        m_meta = v_md_new;
-
-	 endInsertRows();
-	 return true;
+    endInsertRows();
+    return true;
 }
 
-bool PlaylistItemModel::removeRows(int position, int rows, const QModelIndex &index)
+bool PlaylistItemModel::removeRows(int position, int rows,
+                                   const QModelIndex& index)
 {
     Q_UNUSED(index);
     if (rows < 1) {
         return true;
     }
 
-	 beginRemoveRows(QModelIndex(), position, position+rows-1);
+    beginRemoveRows(QModelIndex(), position, position + rows - 1);
 
-     MetaDataList v_md_new;
+    MetaDataList v_md_new;
 
-     for (uint i=0; i<m_meta.size(); i++) {
+    for (uint i = 0; i < m_meta.size(); i++) {
 
-         if(i >= (uint) position && i<=(uint)(position+rows-1)) continue;
+        if (i >= (uint) position && i <= (uint)(position + rows - 1)) {
+            continue;
+        }
 
-         v_md_new.push_back(m_meta[i]);
-	 }
+        v_md_new.push_back(m_meta[i]);
+    }
 
+    m_meta = v_md_new;
 
-     m_meta = v_md_new;
-
-	 endRemoveRows();
-	 return true;
-
+    endRemoveRows();
+    return true;
 }
 
 
-
-void PlaylistItemModel::set_selected(QList<int>& rows){
+void PlaylistItemModel::set_selected(QList<int>& rows)
+{
     _selected_rows = rows;
-    for(uint i=0; i<m_meta.size(); i++){
+    for (uint i = 0; i < m_meta.size(); i++) {
         m_meta[i].pl_selected = rows.contains(i);
     }
 }
 
-bool PlaylistItemModel::is_selected(int row) const {
+bool PlaylistItemModel::is_selected(int row) const
+{
     return _selected_rows.contains(row);
 }

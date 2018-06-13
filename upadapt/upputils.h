@@ -41,6 +41,7 @@ namespace UPnPClient {
 struct MetaData;
 
 extern bool udirentToMetadata(const UPnPClient::UPnPDirObject *, MetaData *);
+extern void metaDataToHtml(const MetaData* metap, QString& html);
 
 
 #endif /* _UPPUTILS_H_INCLUDED_ */

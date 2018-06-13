@@ -1,0 +1,42 @@
+/* We keep the system default size for the general widget. But we have to
+ * specify the sizes (smaller) in some other places, and, because
+ * there are no relative sizes in qss, this has to be done in absolute
+ * values, based on an assumption of a 10pt size for the system default
+ * If you need bigger sizes, uncomment and increase the QWidget value, than
+ * increase the other sizes in proportion. Also change cdbrowser/common.css for
+ * the directory browser area. */
+QWidget {
+/*    font-size: 16pt;*/
+}
+
+/* Player area title. Default 10 */
+QLabel#lab_title {
+    font-size: 10pt;
+    font-weight: bold;
+}
+
+/* Playlist and player area labels except title. Default 7 */
+QLabel#lab_artist, QLabel#lab_album, QLabel#curTime, QLabel#endTime {
+    font-size: 7pt;
+}
+
+/* Titles in playlist entries. Default 8 */
+QLabel#pl_lab_title {
+    font-size: 8pt;
+    font-weight: bold;
+}
+/* Other playlist entry fields. Default 6 pt */
+QLabel#pl_lab_artist, QLabel#pl_lab_album, QLabel#pl_lab_time {
+    font-size: 6pt;
+}
+
+QLabel#lab_totalTime {
+    font-weight: bold;
+}
+
+/* Note that having a minimal resource file and setting the button here
+   was the only way I found to style the tab close button which is otherwise
+   an ugly red thing */
+QTabBar::close-button {
+     image: url(:/icons/cross.png)
+}

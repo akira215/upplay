@@ -1,0 +1,40 @@
+= The Upplay Songcast dialog
+
+image::upplay-songcast.png[]
+
+The Songcast dialog lets you establish and terminate connections between
+the existing Songcast Senders or Receivers on your network.
+
+Songcast Sender modules currently
+link:http://www.linn.co.uk/software#songcast[exist for Windows and Mac OS
+X].
+
+upmpdcli also has a Songcast Sender additional package. Unlike the Mac and
+Windows tools, this does not capture arbitrary audio on the Linux host, but
+it is useful for synchronized multiroom audio.
+
+Songcast Receiver modules come with Linn hardware, or with software
+Renderers like
+link:http://www.lesbonscomptes.com/upmpdcli/sc2mpd.html[upmpdcli] or
+link:https://github.com/PeteManchester/MediaPlayer[MediaPlayer].
+As far as I can see (disclosure: I am the author of `upmpdcli`) the
+Songcast Receiver in Upmpdcli works much better at the moment (12-2015).
+
+You will see Senders listed in the top part of the dialog if there are any
+currently active on the local network.
+
+The bottom part of the dialog list the Receivers, with their connected
+state.
+
+If a Sender is selected in the top part, you can check the `Link to
+selected Sender` boxes, and click `Apply` to establish the connection(s).
+
+Checking `Unlink` and clicking `Apply` will disconnect the selected
+Receivers.
+
+You will need to close and re-open the dialog to update the lists when
+Senders appear, or Receivers appear or disappear from the network,
+
+The Senders are currently not too good at advertising their demise, so you
+may be better off restarting upplay after one goes away, to avoid timeouts
+when using the dialog.

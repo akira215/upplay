@@ -15,6 +15,7 @@
  *	 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include <string>
+#include <set>
 using namespace std;
 
 #include <QString>
@@ -50,7 +51,7 @@ bool udirentToMetadata(const UPnPDirObject *dop, MetaData *mdp)
     mdp->album_id = -1;
 
     mdp->title = u8s2qs(dop->m_title);
-    qDebug() << "udirentToMetadata: title: " << mdp->title;
+    // qDebug() << "udirentToMetadata: title: " << mdp->title;
     mdp->artist = uf2qs(dop, "upnp:artist", false);
     mdp->album = uf2qs(dop, "upnp:album", false);
     mdp->rating = 0;
@@ -88,3 +89,71 @@ bool udirentToMetadata(const UPnPDirObject *dop, MetaData *mdp)
     mdp->albumArtURI = uf2qs(dop, "upnp:albumArtURI", false);
     return true;
 }
+
+static std::set<string> specfields{"upnp:artist", "upnp:album", "upnp:genre",
+        "upnp:albumArtURI", "upnp:originalTrackNumber"};
+
+void metaDataToHtml(const MetaData* metap, QString& html)
+{
+    // We reparse from didl because we want to catch everything, even
+    // what does not go into the MetaData fields. Also it may happen
+    // that we have something in MetaData which does not come from the
+    // Didl data
+    
+    UPnPDirContent dir;
+    UPnPDirObject dirent;
+    bool okdidl(true);
+    // qDebug() << "metaDataToHtml: DIDL: " << metap->didl;
+    if (metap->didl.isEmpty() || !dir.parse(qs2utf8s(metap->didl)) ||
+        dir.m_items.empty()) {
+        okdidl = false;
+        //qDebug() << "metaDataToHtml: no DIDL data or no items";
+    } else {
+        //qDebug() << "metaDataToHtml: DIDL parsed ok";
+        dirent = dir.m_items[0];
+    }
+    html = "";
+    QString val;
+
+    // Some fields are treated specially (see specfields list above),
+    // because we want them in order.
+    val = okdidl ? u8s2qs(dirent.m_title) : metap->title;
+    if (!val.isEmpty()) html += "<p>" + val + "</p>";
+
+    val = okdidl ? u8s2qs(dirent.f2s("upnp:artist", false)) : metap->artist;
+    if (!val.isEmpty()) html += "<p>" + val + "</p>";
+    
+    val = okdidl ? u8s2qs(dirent.f2s("upnp:album", false)) : metap->album;
+    if (!val.isEmpty()) html += "<p>" + val + "</p>";
+
+    val = okdidl ? u8s2qs(dirent.f2s("upnp:genre", false)) :
+        (metap->genres.size() ? metap->genres[0]: QString());
+    if (!val.isEmpty()) html += "<b>Genre: </b>" + val + "<br/>";
+    val = okdidl?u8s2qs(dirent.f2s("upnp:originalTrackNumber", false)) : "";
+    if (!val.isEmpty()) html += "<b>Original track number:</b> " + val + "<br/>";
+
+    if (okdidl) {
+        // Dump all the rest
+        for (auto it : dirent.m_props) {
+            if (specfields.find(it.first) == specfields.end() &&
+                !it.second.empty()) {
+                html += "<b>" + u8s2qs(it.first) + "</b> : " +
+                    u8s2qs(it.second) + "<br/>";
+            }
+        }
+        val = u8s2qs(dirent.f2s("upnp:albumArtURI", false));
+        if (!val.isEmpty()) html += "<b>Album Art URI</b>: " + val + "<br/>";
+
+        for (auto resit : dirent.m_resources) {
+            html += "<p><b>Resource URI:</b> " + u8s2qs(resit.m_uri) + "<br/>";
+            html += "<blockquote>";
+            for (auto it : resit.m_props) {
+                html += "<b>" + u8s2qs(it.first) + "</b> : " +
+                    u8s2qs(it.second) + "<br/>";
+            }
+            html += "</blockquote></p>";
+        }
+    }
+    // qDebug() << "metaDataToHtml: html now: " << html;
+}
+

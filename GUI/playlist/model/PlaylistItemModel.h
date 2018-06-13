@@ -1,5 +1,3 @@
-/* PlaylistItemModel.h */
-
 /* Copyright (C) 2011  Lucio Carreras
  *
  * This file is part of sayonara player
@@ -17,15 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-
-/*
- * PlaylistItemModel.h
- *
- *  Created on: Apr 8, 2011
- *      Author: luke
- */
-
 #ifndef PLAYLISTITEMMODEL_H_
 #define PLAYLISTITEMMODEL_H_
 
@@ -40,31 +29,31 @@
 using namespace std;
 
 
-
 class PlaylistItemModel : public QAbstractListModel {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	PlaylistItemModel(QObject* parent = 0);
+    PlaylistItemModel(QObject* parent = 0);
 
-	virtual ~PlaylistItemModel();
+    virtual ~PlaylistItemModel();
 
-    int rowCount(const QModelIndex &parent=QModelIndex()) const;
-	QVariant data(const QModelIndex &index, int role) const;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const;
+    QVariant data(const QModelIndex& index, int role) const;
 
-	Qt::ItemFlags flags(const QModelIndex &index) const;
+    Qt::ItemFlags flags(const QModelIndex& index) const;
 
-	bool setData(const QModelIndex &index, const QVariant &value, int role);
+    bool setData(const QModelIndex& index, const QVariant& value, int role);
 
-    bool insertRows(int position, int rows, const QModelIndex &index=QModelIndex());
-    bool removeRows(int position, int rows, const QModelIndex &index=QModelIndex());
+    bool insertRows(int position, int rows,
+                    const QModelIndex& index = QModelIndex());
+    bool removeRows(int position, int rows,
+                    const QModelIndex& index = QModelIndex());
 
     void set_selected(QList<int>& rows);
     bool is_selected(int row) const ;
 
 protected:
-    MetaDataList		m_meta;
+    MetaDataList        m_meta;
     QList<int>          _selected_rows;
-
 };
 
 #endif /* PLAYLISTITEMMODEL_H_ */

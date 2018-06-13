@@ -47,7 +47,7 @@ public:
         } else if (!strcmp(nm, "Duration")) {
             emit durationChanged(value);
         } else if (!strcmp(nm, "Seconds")) {
-            emit secondsChanged(value);
+            emit secsInSongChanged(value);
         }
     }
     virtual void changed(const char *, const char *) {
@@ -62,7 +62,7 @@ public slots:
 signals:
     void trackCountChanged(int);
     void durationChanged(int);
-    void secondsChanged(quint32);
+    void secsInSongChanged(quint32);
                                          
 private:
     UPnPClient::OHTMH m_srv;

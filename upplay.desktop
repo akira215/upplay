@@ -1,5 +1,5 @@
 [Desktop Entry]
-Categories=Audio;Player;Qt
+Categories=Audio;Player;Qt;
 Comment=UPnP audio Control Point
 Exec=upplay
 GenericName=UPnP audio Control Point
@@ -7,5 +7,4 @@ Icon=upplay
 Name=Upplay
 Terminal=false
 Type=Application
-Keywords=audio;upnp
-
+Keywords=audio;upnp;

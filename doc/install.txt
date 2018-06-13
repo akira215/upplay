@@ -1,0 +1,45 @@
+== Building and installing Upplay
+
+=== Prerequisites
+
+You will need:
+ 
+- The Qt libraries development packages, including QtWebkit and QtNetwork.
+- qmake.
+- The development packages for libupnp version 1.6 (beware that the package
+  is named libupnp6 on Debian and Ubuntu 14.04, but it was libupnp3 on
+  Ubuntu 12.04), libcurl, and libexpat.
+- Only for building from github source: the autotools (autoconf, automake,
+  libtool). 
+
+You need to download the release tar files for
+http://www.lesbonscomptes.com/upmpdcli/downloads.html[libupnpp] and
+link:downloads.html[upplay], or clone the git repositories: 
+https://github.com/medoc92/libupnpp[libupnpp],
+https://github.com/medoc92/upplay[upplay].
+
+=== Building
+
+Extract the source for libupnpp and upplay, use the following procedures to
+build the two packages:
+
+Building libupnpp:
+
+    cd libupnpp-x.y.z
+    ./configure --prefix=/usr
+    make
+    sudo make install
+
+Building upplay:
+
+    cd upplay-x.y.z
+    qmake
+    sudo make install
+
+And you should now be able to _upplay_ 
+
+The above examples are for source extracted from tar release files. For
+github source, you need to adjust the names of the top directories, and use
+the following command before the libupnpp 'configure':
+  
+    sh autogen.sh
